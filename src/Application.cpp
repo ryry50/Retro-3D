@@ -9,15 +9,20 @@
 #include "Font.h"
 #include "Render.h"
 
-//Initialized variables
+//SCREEN SETTINGS
 int width = 640, height = 480;
 GLdouble nearPlane = 1.0, farPlane = 50.0;
 GLdouble left = -2, right = 2, bottom = -1.5, top = 1.5;
+
+//OBJECT VARIABLES
 float rotation = 0.0;
 float cRot = 0.0;
 float axisSpeed = 1.0;
 float down = 10;
 float speed = 0.05;
+float h = 2.0f;
+
+//CAMERA VARIABLES
 glm::vec3 camTran = glm::vec3(0.0f, 2.0f, 3.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -28,7 +33,7 @@ double lastX = width / 2.0;
 double lastY = height / 2.0;
 double fov = 45.0f;
 
-// timing
+//TIMING
 float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
 
@@ -53,7 +58,7 @@ void processInput(GLFWwindow* window)
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camTran += speed * glm::normalize(glm::cross(cameraFront, cameraUp));
     
-    //camTran.y = 2.0f; //lock y position
+    //camTran.y = h; //lock y position
     
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
         camTran.y += speed;
@@ -67,47 +72,47 @@ void processInput(GLFWwindow* window)
 }
 void mouseInput(GLFWwindow* window, double xposIn, double yposIn);
 
-void drawCubeTex() {
+static void drawCubeTex(double size) {
     glBegin(GL_QUADS);
-    glTexCoord2f(0.0f, 1.0f); glVertex3f(-0.5f, -0.5f, 0.5f);
-    glTexCoord2f(0.0f, 0.0f); glVertex3f(-0.5f, -0.5f,-0.5f);
-    glTexCoord2f(1.0f, 0.0f); glVertex3f( 0.5f, -0.5f,-0.5f);
-    glTexCoord2f(1.0f, 1.0f); glVertex3f( 0.5f, -0.5f, 0.5f);
+    glTexCoord2f(0.0f, 1.0f); glVertex3f(-size, -size, size);
+    glTexCoord2f(0.0f, 0.0f); glVertex3f(-size, -size,-size);
+    glTexCoord2f(1.0f, 0.0f); glVertex3f( size, -size,-size);
+    glTexCoord2f(1.0f, 1.0f); glVertex3f( size, -size, size);
     glEnd();
 
     glBegin(GL_QUADS);
-    glTexCoord2f(0.0f, 1.0f); glVertex3f(-0.5f, 0.5f, 0.5f);
-    glTexCoord2f(0.0f, 0.0f); glVertex3f(-0.5f, 0.5f,-0.5f);
-    glTexCoord2f(1.0f, 0.0f); glVertex3f( 0.5f, 0.5f,-0.5f);
-    glTexCoord2f(1.0f, 1.0f); glVertex3f( 0.5f, 0.5f, 0.5f);
+    glTexCoord2f(0.0f, 1.0f); glVertex3f(-size, size, size);
+    glTexCoord2f(0.0f, 0.0f); glVertex3f(-size, size,-size);
+    glTexCoord2f(1.0f, 0.0f); glVertex3f( size, size,-size);
+    glTexCoord2f(1.0f, 1.0f); glVertex3f( size, size, size);
     glEnd();
 
     glBegin(GL_QUADS);
-    glTexCoord2f(0.0f, 1.0f); glVertex3f(-0.5f, 0.5f,-0.5f);
-    glTexCoord2f(0.0f, 0.0f); glVertex3f(-0.5f,-0.5f,-0.5f);
-    glTexCoord2f(1.0f, 0.0f); glVertex3f( 0.5f,-0.5f,-0.5f);
-    glTexCoord2f(1.0f, 1.0f); glVertex3f( 0.5f, 0.5f,-0.5f);
+    glTexCoord2f(0.0f, 1.0f); glVertex3f(-size, size,-size);
+    glTexCoord2f(0.0f, 0.0f); glVertex3f(-size,-size,-size);
+    glTexCoord2f(1.0f, 0.0f); glVertex3f( size,-size,-size);
+    glTexCoord2f(1.0f, 1.0f); glVertex3f( size, size,-size);
     glEnd();
 
     glBegin(GL_QUADS);
-    glTexCoord2f(0.0f, 1.0f); glVertex3f(-0.5f, 0.5f, 0.5f);
-    glTexCoord2f(0.0f, 0.0f); glVertex3f(-0.5f,-0.5f, 0.5f);
-    glTexCoord2f(1.0f, 0.0f); glVertex3f( 0.5f,-0.5f, 0.5f);
-    glTexCoord2f(1.0f, 1.0f); glVertex3f( 0.5f, 0.5f, 0.5f);
+    glTexCoord2f(0.0f, 1.0f); glVertex3f(-size, size, size);
+    glTexCoord2f(0.0f, 0.0f); glVertex3f(-size,-size, size);
+    glTexCoord2f(1.0f, 0.0f); glVertex3f( size,-size, size);
+    glTexCoord2f(1.0f, 1.0f); glVertex3f( size, size, size);
     glEnd();
 
     glBegin(GL_QUADS);
-    glTexCoord2f(0.0f, 1.0f); glVertex3f(-0.5f,-0.5f, 0.5f );
-    glTexCoord2f(0.0f, 0.0f); glVertex3f(-0.5f,-0.5f,-0.5f );
-    glTexCoord2f(1.0f, 0.0f); glVertex3f(-0.5f, 0.5f,-0.5f );
-    glTexCoord2f(1.0f, 1.0f); glVertex3f(-0.5f, 0.5f, 0.5f);
+    glTexCoord2f(0.0f, 1.0f); glVertex3f(-size,-size, size );
+    glTexCoord2f(0.0f, 0.0f); glVertex3f(-size,-size,-size );
+    glTexCoord2f(1.0f, 0.0f); glVertex3f(-size, size,-size );
+    glTexCoord2f(1.0f, 1.0f); glVertex3f(-size, size, size);
     glEnd();
 
     glBegin(GL_QUADS);
-    glTexCoord2f(0.0f, 1.0f); glVertex3f(0.5f, -0.5f, 0.5f);
-    glTexCoord2f(0.0f, 0.0f); glVertex3f(0.5f, -0.5f, -0.5f);
-    glTexCoord2f(1.0f, 0.0f); glVertex3f(0.5f, 0.5f, -0.5f);
-    glTexCoord2f(1.0f, 1.0f); glVertex3f(0.5f, 0.5f, 0.5f);
+    glTexCoord2f(0.0f, 1.0f); glVertex3f(size, -size, size);
+    glTexCoord2f(0.0f, 0.0f); glVertex3f(size, -size, -size);
+    glTexCoord2f(1.0f, 0.0f); glVertex3f(size, size, -size);
+    glTexCoord2f(1.0f, 1.0f); glVertex3f(size, size, size);
     glEnd();
 }
 
@@ -445,7 +450,7 @@ int main(void)
 			//float cubeTran[3] = { 1.7, 0.5, 1 };
 			//float cubeRot[3] = { 0.5, 1, 0 };
             render.drawStart(view, glm::vec3(1.7, 0.5, 1), camTran, cameraFront, cameraUp, glm::vec3(0.5, 1, 0), glm::sin(cRot) * 200);
-            drawCubeTex();
+            drawCubeTex(0.3);
         }
         texture.unBind();
 
