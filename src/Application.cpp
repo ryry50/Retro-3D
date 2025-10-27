@@ -12,7 +12,7 @@
 //SCREEN SETTINGS
 int width = 640, height = 480;
 GLdouble nearPlane = 1.0, farPlane = 50.0;
-GLdouble left = -2, right = 2, bottom = -1.5, top = 1.5;
+GLdouble left = -1, right = 1, bottom = -0.75, top = 0.75;
 
 //OBJECT VARIABLES
 float rotation = 0.0;
@@ -115,6 +115,51 @@ static void drawCubeTex(double size) {
     glTexCoord2f(1.0f, 1.0f); glVertex3f(size, size, size);
     glEnd();
 }
+
+static void drawRecTex(double length, double width, double height) {
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0f, 1.0f); glVertex3f(-length, -height, width);
+    glTexCoord2f(0.0f, 0.0f); glVertex3f(-length, -height, -width);
+    glTexCoord2f(1.0f, 0.0f); glVertex3f(length, -height, -width);
+    glTexCoord2f(1.0f, 1.0f); glVertex3f(length, -height, width);
+    glEnd();
+
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0f, 1.0f); glVertex3f(-length, height, width);
+    glTexCoord2f(0.0f, 0.0f); glVertex3f(-length, height, -width);
+    glTexCoord2f(1.0f, 0.0f); glVertex3f(length, height, -width);
+    glTexCoord2f(1.0f, 1.0f); glVertex3f(length, height, width);
+    glEnd();
+
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0f, 1.0f); glVertex3f(-length, height, -width);
+    glTexCoord2f(0.0f, 0.0f); glVertex3f(-length, -height, -width);
+    glTexCoord2f(1.0f, 0.0f); glVertex3f(length, -height, -width);
+    glTexCoord2f(1.0f, 1.0f); glVertex3f(length, height, -width);
+    glEnd();
+
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0f, 1.0f); glVertex3f(-length, height, width);
+    glTexCoord2f(0.0f, 0.0f); glVertex3f(-length, -height, width);
+    glTexCoord2f(1.0f, 0.0f); glVertex3f(length, -height, width);
+    glTexCoord2f(1.0f, 1.0f); glVertex3f(length, height, width);
+    glEnd();
+
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0f, 1.0f); glVertex3f(-length, -height, width);
+    glTexCoord2f(0.0f, 0.0f); glVertex3f(-length, -height, -width);
+    glTexCoord2f(1.0f, 0.0f); glVertex3f(-length, height, -width);
+    glTexCoord2f(1.0f, 1.0f); glVertex3f(-length, height, width);
+    glEnd();
+
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0f, 1.0f); glVertex3f(length, -height, width);
+    glTexCoord2f(0.0f, 0.0f); glVertex3f(length, -height, -width);
+    glTexCoord2f(1.0f, 0.0f); glVertex3f(length, height, -width);
+    glTexCoord2f(1.0f, 1.0f); glVertex3f(length, height, width);
+    glEnd();
+}
+
 
 void checkerBox(int x, int z, float *first, float *second) {
     for (x = -16; x < 16; x++) {
@@ -450,7 +495,7 @@ int main(void)
 			//float cubeTran[3] = { 1.7, 0.5, 1 };
 			//float cubeRot[3] = { 0.5, 1, 0 };
             render.drawStart(view, glm::vec3(1.7, 0.5, 1), camTran, cameraFront, cameraUp, glm::vec3(0.5, 1, 0), glm::sin(cRot) * 200);
-            drawCubeTex(0.3);
+            drawRecTex(1, 0.5, 0.5);
         }
         texture.unBind();
 

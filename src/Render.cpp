@@ -33,12 +33,12 @@ void Render::draw(unsigned int indices[], int count, float material[],
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glFrustum(frustum[0], frustum[1], frustum[2], frustum[3], frustum[4], frustum[5]);
-    glTranslatef(tran.x, tran.y, tran.z);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     gluLookAt(camTran.x, camTran.y, camTran.z,
         camTran.x + cameraFront.x, (camTran.y + cameraFront.y), camTran.z + cameraFront.z,
         cameraUp.x, cameraUp.y, cameraUp.z);
+    glTranslatef(tran.x, tran.y, tran.z);
     glRotatef(rSpeed, rotate.x, rotate.y, rotate.z);
     glNormal3f(0, 1, 0);
 
@@ -52,12 +52,13 @@ void Render::drawStart(
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glFrustum(frustum[0], frustum[1], frustum[2], frustum[3], frustum[4], frustum[5]);
-    glTranslatef(tran.x, tran.y, tran.z);
+    
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     gluLookAt(camTran.x, camTran.y, camTran.z,
         camTran.x + cameraFront.x, (camTran.y + cameraFront.y), camTran.z + cameraFront.z,
         cameraUp.x, cameraUp.y, cameraUp.z);
+    glTranslatef(tran.x, tran.y, tran.z);
     glRotatef(rSpeed, rotate.x, rotate.y, rotate.z);
     glNormal3f(0, 1, 0);
 }
