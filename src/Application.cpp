@@ -450,8 +450,17 @@ int main(void)
             checkerBox(x, z, black, white);
 
         }
+
         light(green, lightPos0, blue, lightPos1, white, lightPos2, light2Cutoff, lightPos2Dir, black, white);
         
+        //cube 
+        {
+            texture.bind();
+            render.drawStart(view, glm::vec3(1.7, 0.5, 1), camTran, cameraFront, cameraUp, glm::vec3(1, 0, 0), cRot);
+            drawRecTex(1, 0.5, 0.5);
+            texture.unBind();
+        }
+
         //Gem
         {
             glEnable(GL_BLEND);
@@ -460,14 +469,6 @@ int main(void)
                 view, glm::vec3(0, down, 1), camTran, cameraFront, cameraUp,
                 glm::vec3(0, 1, 0), rotation);
             glDisable(GL_BLEND);
-        }
-
-        //cube 
-        {
-            texture.bind();
-            render.drawStart(view, glm::vec3(1.7, 0.5, 1), camTran, cameraFront, cameraUp, glm::vec3(1, 0, 0), cRot);
-            drawRecTex(1, 0.5, 0.5);
-            texture.unBind();
         }
 
         //Text
