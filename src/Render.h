@@ -17,8 +17,16 @@ public:
 		double frustum[6], glm::vec3 tran,
 		glm::vec3 camTran, glm::vec3 cameraFront, glm::vec3 cameraUp, 
 		glm::vec3 rotate, float rSpeed);
+	void drawTex(unsigned int indices[], int count, float material[],
+		double frustum[6], glm::vec3 tran,
+		glm::vec3 camTran, glm::vec3 cameraFront, glm::vec3 cameraUp,
+		glm::vec3 rotate, float rSpeed, Texture tex);
 	void drawStart(
 		double frustum[6], glm::vec3 tran,
 		glm::vec3 camTran, glm::vec3 cameraFront, glm::vec3 cameraUp,
 		glm::vec3 rotate, float rSpeed);
+	void drawStartTex(
+		double frustum[6], glm::vec3 tran,
+		glm::vec3 camTran, glm::vec3 cameraFront, glm::vec3 cameraUp,
+		glm::vec3 rotate, float rSpeed, void shape(), Texture tex);
 };

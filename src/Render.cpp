@@ -45,6 +45,28 @@ void Render::draw(unsigned int indices[], int count, float material[],
 	glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, indices);
 }
 
+void Render::drawTex(unsigned int indices[], int count, float material[],
+    double frustum[6], glm::vec3 tran,
+    glm::vec3 camTran, glm::vec3 cameraFront, glm::vec3 cameraUp,
+    glm::vec3 rotate, float rSpeed, Texture tex) {
+	tex.bind();
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, material);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glFrustum(frustum[0], frustum[1], frustum[2], frustum[3], frustum[4], frustum[5]);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    gluLookAt(camTran.x, camTran.y, camTran.z,
+        camTran.x + cameraFront.x, (camTran.y + cameraFront.y), camTran.z + cameraFront.z,
+        cameraUp.x, cameraUp.y, cameraUp.z);
+    glTranslatef(tran.x, tran.y, tran.z);
+    glRotatef(rSpeed, rotate.x, rotate.y, rotate.z);
+    glNormal3f(0, 1, 0);
+
+    glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, indices);
+	tex.unBind();
+}
+
 void Render::drawStart(
     double frustum[6], glm::vec3 tran,
     glm::vec3 camTran, glm::vec3 cameraFront, glm::vec3 cameraUp,
@@ -61,4 +83,25 @@ void Render::drawStart(
     glTranslatef(tran.x, tran.y, tran.z);
     glRotatef(rSpeed, rotate.x, rotate.y, rotate.z);
     glNormal3f(0, 1, 0);
+}
+
+void Render::drawStartTex(
+    double frustum[6], glm::vec3 tran,
+    glm::vec3 camTran, glm::vec3 cameraFront, glm::vec3 cameraUp,
+    glm::vec3 rotate, float rSpeed, void shape(), Texture tex) {
+	tex.bind();
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glFrustum(frustum[0], frustum[1], frustum[2], frustum[3], frustum[4], frustum[5]);
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    gluLookAt(camTran.x, camTran.y, camTran.z,
+        camTran.x + cameraFront.x, (camTran.y + cameraFront.y), camTran.z + cameraFront.z,
+        cameraUp.x, cameraUp.y, cameraUp.z);
+    glTranslatef(tran.x, tran.y, tran.z);
+    glRotatef(rSpeed, rotate.x, rotate.y, rotate.z);
+    glNormal3f(0, 1, 0);
+    shape();
+	tex.unBind();
 }

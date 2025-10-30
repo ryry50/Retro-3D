@@ -19,11 +19,11 @@ float rotation = 0.0;
 float cRot = 0.0;
 float axisSpeed = 1.0;
 float down = 10;
-float speed = 0.05;
+float speed = 0.07;
 float h = 2.0f;
 
 //CAMERA VARIABLES
-glm::vec3 camTran = glm::vec3(0.0f, 2.0f, 3.0f);
+glm::vec3 camTran = glm::vec3(0.0f, 2.0f, 8.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 bool firstMouse = true;
@@ -161,7 +161,7 @@ static void drawRecTex(double length, double width, double height) {
 }
 
 
-void checkerBox(int x, int z, float *first, float *second) {
+static void checkerBox(int x, int z, float *first, float *second) {
     for (x = -16; x < 16; x++) {
         for (z = -16; z < 16; z++) {
 
@@ -213,6 +213,30 @@ void checkerBox(int x, int z, float *first, float *second) {
             glEnd();
         }
     }
+}
+
+static void light( float color1[], float pos1[], float color2[], float pos2[], float color3[], float pos3[], float cuttof, float dir[], float ambient[], float spec[]) {
+    glEnable(GL_LIGHTING);
+    glShadeModel(GL_SMOOTH);
+    glEnable(GL_LIGHT0);
+    glEnable(GL_LIGHT1);
+    glEnable(GL_LIGHT2);
+
+    glLightfv(GL_LIGHT0, GL_AMBIENT, color2);
+    glLightfv(GL_LIGHT0, GL_POSITION, pos1);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, color1);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, spec);
+
+    glLightfv(GL_LIGHT1, GL_AMBIENT, ambient);
+    glLightfv(GL_LIGHT1, GL_POSITION, pos2);
+    glLightfv(GL_LIGHT1, GL_DIFFUSE, color2);
+    glLightfv(GL_LIGHT1, GL_SPECULAR, spec);
+
+    glLightfv(GL_LIGHT2, GL_AMBIENT, ambient);
+    glLightfv(GL_LIGHT2, GL_POSITION, pos3);
+    glLightfv(GL_LIGHT2, GL_SPOT_DIRECTION, dir);
+    glLightf(GL_LIGHT2, GL_SPOT_CUTOFF, cuttof);
+    glLightfv(GL_LIGHT2, GL_DIFFUSE, color3);
 }
 
 int main(void)
@@ -388,40 +412,15 @@ int main(void)
     //initialize font, texture and renderer
     Font font;
     font.init();
+
     Render render;
+    render.init(positions, colors);
 
     glEnable(GL_TEXTURE_2D);
     Texture texture("res/Textures/Met.jpg");
     
-    render.init(positions, colors);
     double view[] = { left, right, bottom, top, nearPlane, farPlane };
-
-    //Lights
-
-    {
-        glEnable(GL_LIGHTING);
-        glShadeModel(GL_SMOOTH);
-        glEnable(GL_LIGHT0);
-        glEnable(GL_LIGHT1);
-        glEnable(GL_LIGHT2);
-
-        glLightfv(GL_LIGHT0, GL_AMBIENT, blue);
-        glLightfv(GL_LIGHT0, GL_POSITION, lightPos0);
-        glLightfv(GL_LIGHT0, GL_DIFFUSE, green);
-        glLightfv(GL_LIGHT0, GL_SPECULAR, white);
-
-        glLightfv(GL_LIGHT1, GL_AMBIENT, black);
-        glLightfv(GL_LIGHT1, GL_POSITION, lightPos1);
-        glLightfv(GL_LIGHT1, GL_DIFFUSE, blue);
-        glLightfv(GL_LIGHT1, GL_SPECULAR, white);
-
-        glLightfv(GL_LIGHT2, GL_AMBIENT, black);
-        glLightfv(GL_LIGHT2, GL_POSITION, lightPos2);
-        glLightfv(GL_LIGHT2, GL_SPOT_DIRECTION, lightPos2Dir);
-        glLightf(GL_LIGHT2, GL_SPOT_CUTOFF, light2Cutoff);
-        glLightfv(GL_LIGHT2, GL_DIFFUSE, white);
-    }
-
+	light(green, lightPos0, blue, lightPos1, white, lightPos2, light2Cutoff, lightPos2Dir, black, white);
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -440,64 +439,36 @@ int main(void)
         }
         axisSpeed = down <= 0.6 ? 10.0 : 1.0;
         rotation += axisSpeed;
-        cRot += 0.03;
+        cRot++;
         //floor
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_LIGHTING);
         glShadeModel(GL_SMOOTH);
         
         {
-			//float floorTran[3] = { 0, -1, 1 };
-			//float floorRot[3] = { 0, 0, 0 };
             render.drawStart(view, glm::vec3(0, -1, 1), camTran, cameraFront, cameraUp, glm::vec3(0), NULL);
             checkerBox(x, z, black, white);
 
         }
+        light(green, lightPos0, blue, lightPos1, white, lightPos2, light2Cutoff, lightPos2Dir, black, white);
         
-        //Lights
-        {
-            glEnable(GL_LIGHTING);
-            glShadeModel(GL_SMOOTH);
-            glLightfv(GL_LIGHT0, GL_AMBIENT, blue);
-            glLightfv(GL_LIGHT0, GL_POSITION, lightPos0);
-            glLightfv(GL_LIGHT0, GL_DIFFUSE, green);
-            glLightfv(GL_LIGHT0, GL_SPECULAR, white);
-
-            glLightfv(GL_LIGHT1, GL_AMBIENT, black);
-
-            glLightfv(GL_LIGHT1, GL_POSITION, lightPos1);
-            glLightfv(GL_LIGHT1, GL_DIFFUSE, blue);
-            glLightfv(GL_LIGHT1, GL_SPECULAR, white);
-
-            glLightfv(GL_LIGHT2, GL_AMBIENT, black);
-            glLightfv(GL_LIGHT2, GL_POSITION, lightPos2);
-            glLightfv(GL_LIGHT2, GL_SPOT_DIRECTION, lightPos2Dir);
-            glLightf(GL_LIGHT2, GL_SPOT_CUTOFF, light2Cutoff);
-            glLightfv(GL_LIGHT2, GL_DIFFUSE, white);
-        }
         //Gem
         {
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-            //float gemTran[3] = {0, down, 1 };
-			//float gemRot[3] = { 0, 1, 0 };
             render.draw(indices, sizeof(indices) / sizeof(indices[0]), greenTran, 
                 view, glm::vec3(0, down, 1), camTran, cameraFront, cameraUp,
                 glm::vec3(0, 1, 0), rotation);
-
             glDisable(GL_BLEND);
         }
 
         //cube 
-        texture.bind();
         {
-			//float cubeTran[3] = { 1.7, 0.5, 1 };
-			//float cubeRot[3] = { 0.5, 1, 0 };
-            render.drawStart(view, glm::vec3(1.7, 0.5, 1), camTran, cameraFront, cameraUp, glm::vec3(0.5, 1, 0), glm::sin(cRot) * 200);
+            texture.bind();
+            render.drawStart(view, glm::vec3(1.7, 0.5, 1), camTran, cameraFront, cameraUp, glm::vec3(1, 0, 0), cRot);
             drawRecTex(1, 0.5, 0.5);
+            texture.unBind();
         }
-        texture.unBind();
 
         //Text
         {
@@ -513,10 +484,10 @@ int main(void)
         render.flush(window);
 
     }
-    //glDeleteTextures(1, &textureID);
     glfwTerminate();
     return 0;
 }
+
 
 void mouseInput(GLFWwindow* window, double xposIn, double yposIn) {
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {

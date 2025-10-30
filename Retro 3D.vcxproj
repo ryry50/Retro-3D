@@ -148,6 +148,7 @@
     <ClInclude Include="dependencies\GLEW\include\GL\glew.h" />
     <ClInclude Include="dependencies\GLEW\include\GL\glxew.h" />
     <ClInclude Include="dependencies\GLEW\include\GL\wglew.h" />
+    <ClInclude Include="src\Camera.h" />
     <ClInclude Include="src\Font.h" />
     <ClInclude Include="src\Render.h" />
     <ClInclude Include="src\Texture.h" />
