@@ -437,7 +437,7 @@ int main(void)
         if (down > 0.5) {
             down -= 0.05;
         }
-        axisSpeed = down <= 0.6 ? 10.0 : 1.0;
+        axisSpeed = down <= 0.6 ? 5.0 : 1.0;
         rotation += axisSpeed;
         cRot++;
         //floor
@@ -446,9 +446,10 @@ int main(void)
         glShadeModel(GL_SMOOTH);
         
         {
-            render.drawStart(view, glm::vec3(0, -1, 1), camTran, cameraFront, cameraUp, glm::vec3(0), NULL);
-            checkerBox(x, z, black, white);
-
+            texture.bind();
+            render.drawStart(view, glm::vec3(0, 1, 1), camTran, cameraFront, cameraUp, glm::vec3(0), NULL);
+            drawRecTex(4,  16, 4);
+            texture.unBind();
         }
 
         light(green, lightPos0, blue, lightPos1, white, lightPos2, light2Cutoff, lightPos2Dir, black, white);
