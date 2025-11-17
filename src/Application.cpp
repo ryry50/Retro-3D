@@ -8,6 +8,7 @@
 #include "Texture.h"
 #include "Font.h"
 #include "Render.h"
+#include "Transform.h"
 
 //SCREEN SETTINGS
 int width = 640, height = 480;
@@ -15,10 +16,6 @@ GLdouble nearPlane = 1.0, farPlane = 50.0;
 GLdouble left = -1, right = 1, bottom = -0.75, top = 0.75;
 
 //OBJECT VARIABLES
-float rotation = 0.0;
-float cRot = 0.0;
-float axisSpeed = 1.0;
-float down = 10;
 float speed = 0.07;
 float h = 2.0f;
 
@@ -416,8 +413,12 @@ int main(void)
     Render render;
     render.init(positions, colors);
 
+    Transform move;
+    glm::vec3 diamond = move.init(glm::vec3(0, 0.5, 1));
+
     glEnable(GL_TEXTURE_2D);
     Texture texture("res/Textures/Met.jpg");
+    Texture checker("res/Textures/tilesSmall.png");
     
     double view[] = { left, right, bottom, top, nearPlane, farPlane };
 	light(green, lightPos0, blue, lightPos1, white, lightPos2, light2Cutoff, lightPos2Dir, black, white);
@@ -433,13 +434,12 @@ int main(void)
         processInput(window);
         glViewport(0, 0, width, height);
 
+        double lastTime = 0.0;
+        double currentTime = glfwGetTime();
+        double deltaTime = currentTime - lastTime;
+        lastTime = currentTime;
+
         int x = 0, z = 0;
-        if (down > 0.5) {
-            down -= 0.05;
-        }
-        axisSpeed = down <= 0.6 ? 5.0 : 1.0;
-        rotation += axisSpeed;
-        cRot++;
         //floor
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_LIGHTING);
@@ -456,10 +456,10 @@ int main(void)
         
         //cube 
         {
-            texture.bind();
-            render.drawStart(view, glm::vec3(1.7, 0.5, 1), camTran, cameraFront, cameraUp, glm::vec3(1, 0, 0), cRot);
+            checker.bind();
+            render.drawStart(view, glm::vec3(1.7, 0.5, 1), camTran, cameraFront, cameraUp, glm::vec3(1, 0, 0), 0);
             drawRecTex(1, 0.5, 0.5);
-            texture.unBind();
+            checker.unBind();
         }
 
         //Gem
@@ -467,9 +467,17 @@ int main(void)
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             render.draw(indices, sizeof(indices) / sizeof(indices[0]), greenTran, 
-                view, glm::vec3(0, down, 1), camTran, cameraFront, cameraUp,
-                glm::vec3(0, 1, 0), rotation);
+                view, diamond, camTran, cameraFront, cameraUp,
+                glm::vec3(0, 1, 0), 0);
             glDisable(GL_BLEND);
+            if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
+                diamond = move.translateTo(glm::vec3(3, 5, 1), 3);
+            if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
+                diamond = move.translateTo(glm::vec3(-3, 3, 1), 3);
+            if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS)
+                diamond = move.translateTo(glm::vec3(0, 2, 3), 3);
+            if (glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS)
+                diamond = move.translateTo(glm::vec3(0, 0.5, 1), 3);
         }
 
         //Text
