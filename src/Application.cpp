@@ -471,13 +471,13 @@ int main(void)
                 glm::vec3(0, 1, 0), 0);
             glDisable(GL_BLEND);
             if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
-                diamond = move.translateTo(glm::vec3(3, 5, 1), 3);
+                diamond = move.translateTo(glm::vec3(3, 5, 1), 7);
             if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
-                diamond = move.translateTo(glm::vec3(-3, 3, 1), 3);
+                diamond = move.translateTo(glm::vec3(-3, 3, 1), 7);
             if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS)
-                diamond = move.translateTo(glm::vec3(0, 2, 3), 3);
+                diamond = move.translateTo(glm::vec3(0, 2, 3), 7);
             if (glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS)
-                diamond = move.translateTo(glm::vec3(0, 0.5, 1), 3);
+                diamond = move.translateTo(glm::vec3(0, 0.5, 1), 7);
         }
 
         //Text
