@@ -18,13 +18,13 @@ private:
 	double lastTime = 0.0;
 	double currentTime = glfwGetTime();
 	float deltaTime = currentTime - lastTime;
-	glm::vec3 tolerance;
+	double tolerance = 0.1;
 	bool AtTarget;
 	double pitch;
 	double yaw;
 
 	glm::vec3 current;
-	glm::vec3 prev;
+	glm::vec3 delta;
 public:
 	glm::vec3 init(glm::vec3 init) {
 		current.x = init.x;
@@ -37,17 +37,17 @@ public:
 
 	glm::vec3 translateTo(glm::vec3 target, float speed) {
 		std::cout << "X: " << current.x << " Y: " << current.y << " Z: " << current.z << std::endl;
-		tolerance = speed * glm::abs(target - current);
-		//AtTarget = -tolerance < (target - current) < tolerance;
+		delta = target - current;
+		AtTarget = glm::length(delta) <= tolerance;
 		currentTime = glfwGetTime();
 		deltaTime = currentTime - lastTime;
 		lastTime = currentTime;
-		//if (!AtTarget)
-		//{
+		if (!AtTarget)
+		{
 			current += speed * glm::normalize(target - current) * deltaTime;
 			return current;
-		//}
-		//return target;
+		}
+		return target;
 	}
 
 
