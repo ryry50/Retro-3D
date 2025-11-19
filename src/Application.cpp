@@ -414,7 +414,7 @@ int main(void)
     render.init(positions, colors);
 
     Transform move;
-    glm::vec3 diamond = move.init(glm::vec3(0, 0.5, 1));
+    glm::vec3 diamond = move.init(glm::vec3(0, 10, 1));
 
     glEnable(GL_TEXTURE_2D);
     Texture texture("res/Textures/Met.jpg");
@@ -471,13 +471,10 @@ int main(void)
                 glm::vec3(0, 1, 0), 0);
             glDisable(GL_BLEND);
             if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
-                diamond = move.translateTo(glm::vec3(3, 5, 1), 7);
+                diamond = move.transLinear(glm::vec3(3, 5, 1), 7);
             if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
-                diamond = move.translateTo(glm::vec3(-3, 3, 1), 7);
-            if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS)
-                diamond = move.translateTo(glm::vec3(0, 2, 3), 7);
-            if (glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS)
-                diamond = move.translateTo(glm::vec3(0, 0.5, 1), 7);
+                diamond = move.transOut(glm::vec3(-4, 2, 1), 7);
+
         }
 
         //Text
