@@ -9,23 +9,19 @@
 
 class Transform {
 private:
-	template <typename T>
-	int signum(T val) {
-		if (val > 0) return 1;
-		if (val < 0) return -1;
-		return 0;
-	}
 	double lastTime = 0.0;
 	double currentTime = glfwGetTime();
 	float deltaTime = currentTime - lastTime;
+
 	double tolerance = 0.1;
 	double toleranceC = 0.03;
 	bool AtTarget;
-	double pitch;
-	double yaw;
+	bool AtTargetR;
 
 	glm::vec3 current;
 	glm::vec3 delta;
+	glm::vec3 currentR;
+	glm::vec3 deltaR;
 public:
 	glm::vec3 init(glm::vec3 init) {
 		current.x = init.x;
@@ -90,8 +86,30 @@ public:
 		return target;
 	}
 
+	//Linear rotation function (to be modified)
+	glm::vec4 spinTo(double angle, glm::vec3 axis, float speed) {
+		//Display the current position
+		//std::cout << "X: " << current.x << " Y: " << current.y << " Z: " << current.z << std::endl;
 
+		//Calculate delta time (frame time)
+		currentTime = glfwGetTime();
+		deltaTime = currentTime - lastTime;
+		lastTime = currentTime;
 
-	void exponent(double x);
-	void linear(double x);
+		//Check for large delta times
+		if (deltaTime > 0.5) deltaTime = 0.0;
+
+		//Calculate the difference between target and current rotation
+		delta = axis - current;
+		//Check if we are at the axis position
+		AtTargetR = glm::length(delta) <= tolerance;
+		//Magic line
+		if (!AtTargetR)
+		{
+			current += speed * glm::normalize(delta) * deltaTime;
+			return glm::vec4(current, angle);
+		}
+		//if we are at the target rotation, return the target rotation
+		return glm::vec4(axis, angle);
+	}
 };

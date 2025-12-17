@@ -414,7 +414,9 @@ int main(void)
     render.init(positions, colors);
 
     Transform move;
+    Transform move2;
     glm::vec3 diamond = move.init(glm::vec3(0, 10, 1));
+	glm::vec3 rec = move2.init(glm::vec3(1.7, 0.5, 1));
 
     glEnable(GL_TEXTURE_2D);
     Texture texture("res/Textures/Met.jpg");
@@ -457,9 +459,10 @@ int main(void)
         //cube 
         {
             checker.bind();
-            render.drawStart(view, glm::vec3(1.7, 0.5, 1), camTran, cameraFront, cameraUp, glm::vec3(1, 0, 0), 0);
+            render.drawStart(view, rec, camTran, cameraFront, cameraUp, glm::vec3(1, 0, 0), 0);
             drawRecTex(1, 0.5, 0.5);
             checker.unBind();
+            
         }
 
         //Gem
@@ -468,12 +471,15 @@ int main(void)
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             render.draw(indices, sizeof(indices) / sizeof(indices[0]), greenTran, 
                 view, diamond, camTran, cameraFront, cameraUp,
-                glm::vec3(0, 1, 0), 0);
+                glm::vec3(0, 1, 0), 0, 0);
             glDisable(GL_BLEND);
+            diamond = move.transLinear(glm::vec3(0, 0.5, 1), 3);
+            /*
             if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
                 diamond = move.transLinear(glm::vec3(3, 5, 1), 7);
             if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
                 diamond = move.transOut(glm::vec3(-4, 2, 1), 7);
+            */
 
         }
 
@@ -483,10 +489,9 @@ int main(void)
             font.reshape(width, height);
             GLfloat white[3] = { 1.0, 1.0, 1.0, };
             font.printO("RYERS EMERALD OR SMN LIKE THAT", 300, 50, white);
+            font.drawUI(imageData.pixel_data, 5, 5, 320, 240, white);
         }
 
-        //glRasterPos2i(200, 200);
-        //glDrawPixels(imageData.width, imageData.height, GL_RGBA, GL_UNSIGNED_BYTE, imageData.pixel_data);
        
         render.flush(window);
 

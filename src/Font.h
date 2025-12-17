@@ -92,4 +92,14 @@ public:
         glRasterPos2i(x, y);
         printString(s);
     }
+
+    void drawUI(const void* pixels, float sizeX, float sizeY, float x, float y, float color[3]) {
+        glColor3fv(color);
+        glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, color);
+
+        glRasterPos2i(x, y);
+        glDrawPixels(sizeX, sizeY, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+
+    }
+
 };
