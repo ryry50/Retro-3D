@@ -23,6 +23,7 @@ float h = 2.0f;
 glm::vec3 camTran = glm::vec3(0.0f, 2.0f, 8.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+glm::vec3 cameraForward = glm::vec3(0.0f, 0.0f, -1.0f);
 bool firstMouse = true;
 double yaw = -90.0f;	// yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right so we initially rotate a bit to the left.
 double pitch = 0.0f;
@@ -47,13 +48,13 @@ void processInput(GLFWwindow* window)
         glfwSetWindowShouldClose(window, true);
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        camTran += speed * cameraFront;
+        camTran += speed * cameraForward;
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        camTran -= speed * cameraFront;
+        camTran -= speed * cameraForward;
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        camTran -= speed * glm::normalize(glm::cross(cameraFront, cameraUp));
+        camTran -= speed * glm::normalize(glm::cross(cameraForward, cameraUp));
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        camTran += speed * glm::normalize(glm::cross(cameraFront, cameraUp));
+        camTran += speed * glm::normalize(glm::cross(cameraForward, cameraUp));
     
     //camTran.y = h; //lock y position
     
@@ -504,6 +505,7 @@ int main(void)
 void mouseInput(GLFWwindow* window, double xposIn, double yposIn) {
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
 
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         float xpos = static_cast<float>(xposIn);
         float ypos = static_cast<float>(yposIn);
 
@@ -533,10 +535,17 @@ void mouseInput(GLFWwindow* window, double xposIn, double yposIn) {
             pitch = -89.0f;
 
         glm::vec3 front;
+        glm::vec3 forward;
         front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
         front.y = sin(glm::radians(pitch));
         front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+
+        forward.x = cos(glm::radians(yaw));
+        forward.y = 0;
+        forward.z = sin(glm::radians(yaw));
+
         cameraFront = glm::normalize(front);
+		cameraForward = glm::normalize(forward);
 
         //std::cout << "pitch" << pitch << std::endl;
         //std::cout << "yaw" << yaw << std::endl;
