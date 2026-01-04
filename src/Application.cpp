@@ -10,17 +10,25 @@
 #include "Render.h"
 #include "Transform.h"
 
+//WORLD PHYSICS
+float grav = 0.01;
+float ground = 0;
+
+//PLAYER
+float playerH = 3.0f;
+float vsp = 0;
+bool isGrounded;
+float speed = 0.1;
+
 //SCREEN SETTINGS
 int width = 640, height = 480;
 GLdouble nearPlane = 1.0, farPlane = 50.0;
 GLdouble left = -1, right = 1, bottom = -0.75, top = 0.75;
 
 //OBJECT VARIABLES
-float speed = 0.07;
-float h = 2.0f;
 
 //CAMERA VARIABLES
-glm::vec3 camTran = glm::vec3(0.0f, 2.0f, 8.0f);
+glm::vec3 camTran = glm::vec3(0.0f, playerH, 8.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 glm::vec3 cameraForward = glm::vec3(0.0f, 0.0f, -1.0f);
@@ -42,6 +50,22 @@ void window_size_callback(GLFWwindow* window, int x, int y)
     height = y;
 }
 
+bool boundCheck(float bound) {
+    return camTran.x <= bound && camTran.x >= -bound
+        && camTran.z <= bound && camTran.z >= -bound;
+}
+
+void groundCheck() {
+    if (!isGrounded) {
+        camTran.y += vsp;
+        vsp -= grav;
+    }
+    if (isGrounded) {
+        camTran.y = playerH + ground;
+        vsp = 0;
+    }
+}
+
 void processInput(GLFWwindow* window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -58,10 +82,14 @@ void processInput(GLFWwindow* window)
     
     //camTran.y = h; //lock y position
     
-    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-        camTran.y += speed;
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && isGrounded) {
+        vsp = 0.25;
+        isGrounded = false;
+    }
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-        camTran.y -= speed;
+        speed = 0.15;
+    else if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE)
+        speed = 0.1;
      
     if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -158,6 +186,14 @@ static void drawRecTex(double length, double width, double height) {
     glEnd();
 }
 
+static void drawFloorTex(float size, int repeat) {
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0f, 0.0f); glVertex3f(-size, 0, size);
+    glTexCoord2f(repeat, 0.0f); glVertex3f(size, 0, size);
+    glTexCoord2f(repeat, repeat); glVertex3f(size, 0, -size);
+    glTexCoord2f(0.0f, repeat); glVertex3f(-size, 0, -size);
+    glEnd();
+}
 
 static void checkerBox(int x, int z, float *first, float *second) {
     for (x = -16; x < 16; x++) {
@@ -434,6 +470,7 @@ int main(void)
         glfwSetWindowSizeCallback(window, window_size_callback);
         glfwSetWindowAspectRatio(window, 4, 3);
         glfwSetCursorPosCallback(window, mouseInput);
+        isGrounded = camTran.y - ground <= playerH && boundCheck(40);
         processInput(window);
         glViewport(0, 0, width, height);
 
@@ -441,8 +478,12 @@ int main(void)
         double currentTime = glfwGetTime();
         double deltaTime = currentTime - lastTime;
         lastTime = currentTime;
+        
+        
+        groundCheck();
 
-        int x = 0, z = 0;
+        //std::cout << "height" << camTran.y << std::endl;
+
         //floor
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_LIGHTING);
@@ -450,8 +491,9 @@ int main(void)
         
         {
             texture.bind();
-            render.drawStart(view, glm::vec3(0, 1, 1), camTran, cameraFront, cameraUp, glm::vec3(0), NULL);
-            drawRecTex(4,  16, 4);
+            render.drawStart(view, glm::vec3(0, ground, 0), camTran, cameraFront, cameraUp, glm::vec3(0), NULL);
+            //drawRecTex(4,  16, 4);
+			drawFloorTex(40, 8);
             texture.unBind();
         }
 
@@ -463,7 +505,6 @@ int main(void)
             render.drawStart(view, rec, camTran, cameraFront, cameraUp, glm::vec3(1, 0, 0), 0);
             drawRecTex(1, 0.5, 0.5);
             checker.unBind();
-            
         }
 
         //Gem
@@ -490,7 +531,7 @@ int main(void)
             font.reshape(width, height);
             GLfloat white[3] = { 1.0, 1.0, 1.0, };
             font.printO("RYERS EMERALD OR SMN LIKE THAT", 300, 50, white);
-            font.drawUI(imageData.pixel_data, 5, 5, 320, 240, white);
+            font.drawUI(imageData.pixel_data, 5, 5, width/2, height/2, white);
         }
 
        
