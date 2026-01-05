@@ -138,6 +138,7 @@
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">src/Vendor;$(SolutionDir)dependencies\GFLW\include;$(SolutionDir)dependencies\GLEW\include</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\image_256.c" />
+    <ClCompile Include="src\Model.cpp" />
     <ClCompile Include="src\Render.cpp" />
     <ClCompile Include="src\Vendor\stb_image\stb_image.cpp" />
   </ItemGroup>
@@ -151,6 +152,7 @@
     <ClInclude Include="src\Camera.h" />
     <ClInclude Include="src\Collision.h" />
     <ClInclude Include="src\Font.h" />
+    <ClInclude Include="src\Model.h" />
     <ClInclude Include="src\Render.h" />
     <ClInclude Include="src\Texture.h" />
     <ClInclude Include="src\Transform.h" />

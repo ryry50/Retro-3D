@@ -13,65 +13,66 @@ int Model::GetDisplayList(char* path) {
 	std::vector< std::vector< std::vector<int> > > faces;
 
 	char c;
-	FILE* fd = fopen(path, "r");
+	FILE* fd;
+	errno_t err = fopen_s(&fd, path, "r");
 
 	do {
 
-		fscanf(fd, "%c", &c);
+		fscanf_s(fd, "%c", &c);
 
 		if (c == 'v')
 		{
 			Coord aux;
-			fscanf(fd, "%c", &c); //espacio
-			fscanf(fd, "%f", &aux.x);
-			fscanf(fd, "%c", &c); //espacio
-			fscanf(fd, "%f", &aux.y);
-			fscanf(fd, "%c", &c); //espacio
-			fscanf(fd, "%f", &aux.z);
+			fscanf_s(fd, "%c", &c); //espacio
+			fscanf_s(fd, "%f", &aux.x);
+			fscanf_s(fd, "%c", &c); //espacio
+			fscanf_s(fd, "%f", &aux.y);
+			fscanf_s(fd, "%c", &c); //espacio
+			fscanf_s(fd, "%f", &aux.z);
 
 			vertexs.push_back(aux);
-			fscanf(fd, "%c", &c); //salto de linea
+			fscanf_s(fd, "%c", &c); //salto de linea
 		}
 		if (c == 't')
 		{
 			std::pair<float, float> st;
-			fscanf(fd, "%c", &c); //espacio
-			fscanf(fd, "%f", &st.first);
-			fscanf(fd, "%c", &c); //espacio
-			fscanf(fd, "%f", &st.second);
+			fscanf_s(fd, "%c", &c); //espacio
+			fscanf_s(fd, "%f", &st.first);
+			fscanf_s(fd, "%c", &c); //espacio
+			fscanf_s(fd, "%f", &st.second);
 
 			texcoords.push_back(st);
-			fscanf(fd, "%c", &c); //salto de linea
+			fscanf_s(fd, "%c", &c); //salto de linea
 		}
 		if (c == 'n')
 		{
 			Coord aux;
-			fscanf(fd, "%c", &c); //espacio
-			fscanf(fd, "%f", &aux.x);
-			fscanf(fd, "%c", &c); //espacio
-			fscanf(fd, "%f", &aux.y);
-			fscanf(fd, "%c", &c); //espacio
-			fscanf(fd, "%f", &aux.z);
+			fscanf_s(fd, "%c", &c); //espacio
+			fscanf_s(fd, "%f", &aux.x);
+			fscanf_s(fd, "%c", &c); //espacio
+			fscanf_s(fd, "%f", &aux.y);
+			fscanf_s(fd, "%c", &c); //espacio
+			fscanf_s(fd, "%f", &aux.z);
 
 			normals.push_back(aux);
-			fscanf(fd, "%c", &c); //salto de linea
+			fscanf_s(fd, "%c", &c); //salto de linea
 		}
 		if (c == 'f')
 		{
 			std::vector< std::vector<int> > points;
 			std::vector<int> point(3);
 
-			fscanf(fd, "%c", &c); //espacio
+			fscanf_s(fd, "%c", &c); //espacio
 
 			do {
-				fscanf(fd, "%d", &point[0]);
-				fscanf(fd, "%c", &c); //separador
-				fscanf(fd, "%d", &point[1]);
-				fscanf(fd, "%c", &c); //separador
-				fscanf(fd, "%d", &point[2]);
+				fscanf_s(fd, "%d", &point[0]);
+				fscanf_s(fd, "%c", &c); //separador
+				fscanf_s(fd, "%d", &point[1]);
+				fscanf_s(fd, "%c", &c); //separador
+				fscanf_s(fd, "%d", &point[2]);
 
 				points.push_back(point);
-				fscanf(fd, "%c", &c); //espacio o salto de linea
+				fscanf_s(fd, "%c", &c); //espacio o salto de linea
 			} while (c == ' ');
 
 			faces.push_back(points);
