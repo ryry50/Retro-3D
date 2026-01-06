@@ -9,6 +9,7 @@
 #include "Font.h"
 #include "Render.h"
 #include "Transform.h"
+#include "Model.h"
 
 //WORLD PHYSICS
 float grav = 0.01;
