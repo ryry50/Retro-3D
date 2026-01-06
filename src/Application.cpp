@@ -18,6 +18,7 @@ float ground = 0;
 float playerH = 3.0f;
 float vsp = 0;
 bool isGrounded;
+bool isCrouched = false;
 float speed = 0.1;
 
 //SCREEN SETTINGS
@@ -50,6 +51,14 @@ void window_size_callback(GLFWwindow* window, int x, int y)
     height = y;
 }
 
+void crouchCheck() {
+    if (isCrouched) {
+        playerH = 1.5f;
+    }
+    else {
+        playerH = 3.0f;
+    }
+}
 bool boundCheck(float bound) {
     return camTran.x <= bound && camTran.x >= -bound
         && camTran.z <= bound && camTran.z >= -bound;
@@ -90,6 +99,11 @@ void processInput(GLFWwindow* window)
         speed = 0.15;
     else if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE)
         speed = 0.1;
+    if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+		isCrouched = true;
+    else if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_RELEASE)
+		isCrouched = false;
+
      
     if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -479,7 +493,7 @@ int main(void)
         double deltaTime = currentTime - lastTime;
         lastTime = currentTime;
         
-        
+		crouchCheck();
         groundCheck();
 
         //std::cout << "height" << camTran.y << std::endl;

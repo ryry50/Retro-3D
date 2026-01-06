@@ -154,6 +154,7 @@
     <ClInclude Include="src\Font.h" />
     <ClInclude Include="src\Model.h" />
     <ClInclude Include="src\Render.h" />
+    <ClInclude Include="src\SkeletalMesh.h" />
     <ClInclude Include="src\Texture.h" />
     <ClInclude Include="src\Transform.h" />
     <ClInclude Include="src\Vendor\glm\common.hpp" />
