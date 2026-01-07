@@ -14,7 +14,7 @@ int Model::GetDisplayList(char* path) {
 
 	std::cout << "Loading model: " << path << std::endl;
 
-	char c;
+	char c[3];
 	FILE* fd = NULL;
 	errno_t err = fopen_s(&fd, path, "r");
 
@@ -25,9 +25,9 @@ int Model::GetDisplayList(char* path) {
 
 	do {
 
-		fscanf_s(fd, "%c", &c, 1);
+		fscanf_s(fd, "%2s", c, 3);
 
-		if (c == 'v')
+		if (strcmp(c, "v") == 0)
 		{
 			Coord aux;
 			fscanf_s(fd, "%c", &c, 1); //espacio
@@ -40,7 +40,7 @@ int Model::GetDisplayList(char* path) {
 			vertexs.push_back(aux);
 			fscanf_s(fd, "%c", &c, 1); //salto de linea
 		}
-		if (c == 't')
+		if (strcmp(c, "vt") == 0)
 		{
 			std::pair<float, float> st;
 			fscanf_s(fd, "%c", &c, 1); //espacio
@@ -51,7 +51,7 @@ int Model::GetDisplayList(char* path) {
 			texcoords.push_back(st);
 			fscanf_s(fd, "%c", &c, 1); //salto de linea
 		}
-		if (c == 'n')
+		if (strcmp(c, "vn") == 0)
 		{
 			Coord aux;
 			fscanf_s(fd, "%c", &c, 1); //espacio
@@ -64,7 +64,7 @@ int Model::GetDisplayList(char* path) {
 			normals.push_back(aux);
 			fscanf_s(fd, "%c", &c, 1); //salto de linea
 		}
-		if (c == 'f')
+		if (strcmp(c, "f") == 0)
 		{
 			std::vector< std::vector<int> > points;
 			std::vector<int> point(3);
@@ -80,7 +80,7 @@ int Model::GetDisplayList(char* path) {
 
 				points.push_back(point);
 				fscanf_s(fd, "%c", &c, 1); //espacio o salto de linea
-			} while (c == ' ');
+			} while (strcmp(c, " ") == 0);
 
 			faces.push_back(points);
 		}
@@ -91,7 +91,7 @@ int Model::GetDisplayList(char* path) {
 	glNewList(dl, GL_COMPILE);
 
 	std::cout << "Model loaded: " << vertexs.size() << " vertexs, " << texcoords.size() << " texcoords, " << normals.size() << " normals, " << faces.size() << " faces." << std::endl;
-/*
+
 	for (unsigned int i = 0; i < faces.size(); i++)
 	{
 		if (faces[i].size() == 3)
@@ -131,7 +131,7 @@ int Model::GetDisplayList(char* path) {
 			glEnd();
 		}
 	}
-	*/
+	
 
 	glEndList();
 	fclose(fd);
@@ -139,13 +139,13 @@ int Model::GetDisplayList(char* path) {
 	return dl;
 }
 
-void Model::loadModel(const std::string& path, int listID) {
+void Model::loadModel(const std::string& path) {
 	// Load model from file and create display list
 	listID = GetDisplayList(const_cast<char*>(path.c_str()));
 }
 
-void Model::drawModel(int model_id) {
+void Model::drawModel() {
 	// Draw the model using the display list
-	glCallList(model_id);
+	glCallList(listID);
 }
 

@@ -19,8 +19,9 @@ class Model {
 	public:
 		Model();
 		~Model();
-		void loadModel(const std::string& path, int listID);
-		void drawModel(int model_id);
+		void loadModel(const std::string& path);
+		void drawModel();
 	private:
 		int GetDisplayList(char* path);
+		int listID;
 };

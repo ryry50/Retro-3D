@@ -86,6 +86,20 @@ void Render::drawStart(
     glNormal3f(0, 1, 0);
 }
 
+void Render::drawStartNoCam(
+    double frustum[6], glm::vec3 tran,
+    glm::vec3 rotate, float rSpeed) {
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glFrustum(frustum[0], frustum[1], frustum[2], frustum[3], frustum[4], frustum[5]);
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glTranslatef(tran.x, tran.y, tran.z);
+    glRotatef(rSpeed, rotate.x, rotate.y, rotate.z);
+    glNormal3f(0, 1, 0);
+}
+
 void Render::drawStartTex(
     double frustum[6], glm::vec3 tran,
     glm::vec3 camTran, glm::vec3 cameraFront, glm::vec3 cameraUp,

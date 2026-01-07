@@ -465,7 +465,7 @@ int main(void)
     Render render;
     render.init(positions, colors);
 
-	Model model;
+	Model gun;
 
     Transform move;
     Transform move2;
@@ -475,11 +475,12 @@ int main(void)
     glEnable(GL_TEXTURE_2D);
     Texture texture("res/Textures/Met.jpg");
     Texture checker("res/Textures/tilesSmall.png");
+	Texture gunTex("res/Textures/gunTex.mtl");
     
     double view[] = { left, right, bottom, top, nearPlane, farPlane };
 	light(green, lightPos0, blue, lightPos1, white, lightPos2, light2Cutoff, lightPos2Dir, black, white);
 
-	model.loadModel("res/mesh/gun/AK.obj", 1);
+	gun.loadModel("res/mesh/gun/AK.obj");
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -489,7 +490,7 @@ int main(void)
         glfwSetWindowSizeCallback(window, window_size_callback);
         glfwSetWindowAspectRatio(window, 4, 3);
         glfwSetCursorPosCallback(window, mouseInput);
-        isGrounded = camTran.y - ground <= playerH && boundCheck(40);
+        isGrounded = camTran.y - ground <= playerH && boundCheck(40) && camTran.y > ground;
         processInput(window);
         glViewport(0, 0, width, height);
 
@@ -553,10 +554,12 @@ int main(void)
             font.drawUI(imageData.pixel_data, 5, 5, width/2, height/2, white);
         }
 
-        //cube 
+        //gun
         {
-            render.drawStart(view, glm::vec3(5, 1, 1), camTran, cameraFront, cameraUp, glm::vec3(1, 0, 0), 0);
-			model.drawModel(1);
+			texture.bind();
+            render.drawStartNoCam(view, glm::vec3(0.7, -0.7, -1), glm::vec3(0, 1, 0), 180);
+			gun.drawModel();
+			texture.unBind();
         }
 
        

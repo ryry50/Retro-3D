@@ -18,9 +18,10 @@ class SkeletalMesh {
 public:
 	SkeletalMesh();
 	~SkeletalMesh();
-	void loadMesh(const std::string& path, int meshID);
-	void drawMesh(int mesh_id);
+	void loadMesh(const std::string& path);
+	void drawMesh();
 private:
 	int GetDisplayList(char* path);
+	int meshID;
 	std::vector<int> boneIDs;
 };
