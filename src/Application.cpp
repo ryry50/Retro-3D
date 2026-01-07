@@ -465,6 +465,8 @@ int main(void)
     Render render;
     render.init(positions, colors);
 
+	Model model;
+
     Transform move;
     Transform move2;
     glm::vec3 diamond = move.init(glm::vec3(0, 10, 1));
@@ -476,6 +478,8 @@ int main(void)
     
     double view[] = { left, right, bottom, top, nearPlane, farPlane };
 	light(green, lightPos0, blue, lightPos1, white, lightPos2, light2Cutoff, lightPos2Dir, black, white);
+
+	model.loadModel("res/mesh/gun/AK.obj", 1);
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -547,6 +551,12 @@ int main(void)
             GLfloat white[3] = { 1.0, 1.0, 1.0, };
             font.printO("RYERS EMERALD OR SMN LIKE THAT", 300, 50, white);
             font.drawUI(imageData.pixel_data, 5, 5, width/2, height/2, white);
+        }
+
+        //cube 
+        {
+            render.drawStart(view, glm::vec3(5, 1, 1), camTran, cameraFront, cameraUp, glm::vec3(1, 0, 0), 0);
+			model.drawModel(1);
         }
 
        
