@@ -59,6 +59,25 @@ public:
 		return target;
 	}
 
+	//Linear translation function
+	glm::vec3 transSin(glm::vec3 clamp1, glm::vec3 clamp2, float speed) {
+		//Display the current position
+		//std::cout << "X: " << current.x << " Y: " << current.y << " Z: " << current.z << std::endl;
+
+		//Calculate delta time (frame time)
+		currentTime = glfwGetTime();
+		deltaTime = currentTime - lastTime;
+		lastTime = currentTime;
+
+		//Check for large delta times
+		if (deltaTime > 0.5) deltaTime = 0.0;
+
+		current = glm::sin(speed * (float)glfwGetTime()) * (clamp2 - clamp1) / 2.0f + (clamp2 + clamp1) / 2.0f;
+
+		//if we are at the target position, return the target position
+		return current;
+	}
+
 	//ease out function translation
 	glm::vec3 transOut(glm::vec3 target, float speed) {
 		//Display the current position

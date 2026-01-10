@@ -1,4 +1,3 @@
-#pragma once
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include "Texture.h"
@@ -22,6 +21,7 @@ public:
 	void drawMesh();
 private:
 	int GetDisplayList(char* path);
+	int getAnimationData(char* path);
 	int meshID;
 	std::vector<int> boneIDs;
 };

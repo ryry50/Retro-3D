@@ -4,6 +4,7 @@ Model::Model() {}
 
 Model::~Model() {}
 
+//Credit to the creator of the ballenger demo for this OBJ loader code: heavily modified to fit into this class structure and security
 int Model::GetDisplayList(char* path) {
 	struct Coord { float x, y, z; };
 

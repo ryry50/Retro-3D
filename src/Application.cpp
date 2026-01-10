@@ -18,9 +18,11 @@ float ground = 0;
 //PLAYER
 float playerH = 3.0f;
 float vsp = 0;
+bool idle = true;
 bool isGrounded;
 bool isCrouched = false;
 float speed = 0.1;
+float health = 100.0f;
 
 //SCREEN SETTINGS
 int width = 640, height = 480;
@@ -90,6 +92,16 @@ void processInput(GLFWwindow* window)
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camTran += speed * glm::normalize(glm::cross(cameraForward, cameraUp));
     
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS ||
+        glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS ||
+        glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS ||
+        glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+		idle = false;
+    }
+    else {
+		idle = true;
+    }
+
     //camTran.y = h; //lock y position
     
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && isGrounded) {
@@ -470,12 +482,13 @@ int main(void)
     Transform move;
     Transform move2;
     glm::vec3 diamond = move.init(glm::vec3(0, 10, 1));
-	glm::vec3 rec = move2.init(glm::vec3(1.7, 0.5, 1));
+	glm::vec3 rec = glm::vec3(1.7, 0.5, 1);
+	glm::vec3 gunPos = move2.init(glm::vec3(0.8, -1, -1.5));
 
     glEnable(GL_TEXTURE_2D);
     Texture texture("res/Textures/Met.jpg");
     Texture checker("res/Textures/tilesSmall.png");
-	Texture gunTex("res/Textures/gunTex.mtl");
+	Texture gunTex("res/Textures/dither_it_AK-47_type_II_noBG.png");
     
     double view[] = { left, right, bottom, top, nearPlane, farPlane };
 	light(green, lightPos0, blue, lightPos1, white, lightPos2, light2Cutoff, lightPos2Dir, black, white);
@@ -545,21 +558,27 @@ int main(void)
 
         }
 
+        //gun
+        {
+            if (idle) {
+                gunPos = move2.transSin(glm::vec3(0.8, -1, -1.5), glm::vec3(0.8, -0.9, -1.5), 2);
+            }
+            else {
+				gunPos = move2.transSin(glm::vec3(0.8, -1, -1.2), glm::vec3(0.8, -1, -1.5), 10);
+            }
+            gunTex.bind();
+            render.drawStartNoCam(view, gunPos, glm::vec3(0, 1, 0), 180);
+            gun.drawModel();
+            gunTex.unBind();
+        }
+
         //Text
         {
             font.init();
             font.reshape(width, height);
             GLfloat white[3] = { 1.0, 1.0, 1.0, };
-            font.printO("RYERS EMERALD OR SMN LIKE THAT", 300, 50, white);
+            font.printO("HEALTH", width/8, height/9, white);
             font.drawUI(imageData.pixel_data, 5, 5, width/2, height/2, white);
-        }
-
-        //gun
-        {
-			texture.bind();
-            render.drawStartNoCam(view, glm::vec3(0.7, -0.7, -1), glm::vec3(0, 1, 0), 180);
-			gun.drawModel();
-			texture.unBind();
         }
 
        
@@ -572,7 +591,7 @@ int main(void)
 
 
 void mouseInput(GLFWwindow* window, double xposIn, double yposIn) {
-    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
 
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         float xpos = static_cast<float>(xposIn);
@@ -619,7 +638,7 @@ void mouseInput(GLFWwindow* window, double xposIn, double yposIn) {
         //std::cout << "pitch" << pitch << std::endl;
         //std::cout << "yaw" << yaw << std::endl;
     }
-    else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE)
+    else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE)
     {
         // Unhides cursor since camera is not looking around anymore
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
