@@ -21,12 +21,18 @@ float vsp = 0;
 bool idle = true;
 bool isGrounded;
 bool isCrouched = false;
+int ammo = 30;
 float speed = 0.1;
 float health = 100.0f;
 
+//GUN
+bool shooting = false;
+glm::vec3 bullet;
+float range = 100;
+
 //SCREEN SETTINGS
 int width = 640, height = 480;
-GLdouble nearPlane = 1.0, farPlane = 50.0;
+GLdouble nearPlane = 1.0, farPlane = 100.0;
 GLdouble left = -1, right = 1, bottom = -0.75, top = 0.75;
 
 //OBJECT VARIABLES
@@ -117,6 +123,8 @@ void processInput(GLFWwindow* window)
     else if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_RELEASE)
 		isCrouched = false;
 
+    if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
+        ammo = 30;
      
     if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -487,7 +495,7 @@ int main(void)
 
     glEnable(GL_TEXTURE_2D);
     Texture texture("res/Textures/Met.jpg");
-    Texture checker("res/Textures/tilesSmall.png");
+    Texture checker("res/Textures/DAMN.jpg");
 	Texture gunTex("res/Textures/dither_it_AK-47_type_II_noBG.png");
     
     double view[] = { left, right, bottom, top, nearPlane, farPlane };
@@ -505,6 +513,17 @@ int main(void)
         glfwSetCursorPosCallback(window, mouseInput);
         isGrounded = camTran.y - ground <= playerH && boundCheck(40) && camTran.y > ground;
         processInput(window);
+
+        if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && ammo > 0) {
+            ammo--;
+            bullet = cameraFront;
+            shooting = true;
+            std::cout << "Ammo: " << ammo << std::endl;
+        }
+        else {
+            shooting = false;
+        }
+
         glViewport(0, 0, width, height);
 
         double lastTime = 0.0;
@@ -560,11 +579,15 @@ int main(void)
 
         //gun
         {
-            if (idle) {
-                gunPos = move2.transSin(glm::vec3(0.8, -1, -1.5), glm::vec3(0.8, -0.9, -1.5), 2);
+               
+            if(!idle && !shooting) {
+				gunPos = move2.transSin(glm::vec3(0.8, -1, -1.2), glm::vec3(0.8, -1, -1.5), 10);
+            }
+            else if (shooting) {
+                gunPos = move2.transSin(glm::vec3(0.8, -1, -1.2), glm::vec3(0.8, -1, -1.5), 100);
             }
             else {
-				gunPos = move2.transSin(glm::vec3(0.8, -1, -1.2), glm::vec3(0.8, -1, -1.5), 10);
+                gunPos = move2.transSin(glm::vec3(0.8, -1, -1.5), glm::vec3(0.8, -0.9, -1.5), 2);
             }
             gunTex.bind();
             render.drawStartNoCam(view, gunPos, glm::vec3(0, 1, 0), 180);
@@ -637,6 +660,7 @@ void mouseInput(GLFWwindow* window, double xposIn, double yposIn) {
 
         //std::cout << "pitch" << pitch << std::endl;
         //std::cout << "yaw" << yaw << std::endl;
+
     }
     else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE)
     {
