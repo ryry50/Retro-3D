@@ -21,7 +21,7 @@ float vsp = 0;
 bool idle = true;
 bool isGrounded;
 bool isCrouched = false;
-int ammo = 30;
+int ammo = 60;
 float speed = 0.1;
 float health = 100.0f;
 
@@ -60,7 +60,7 @@ void window_size_callback(GLFWwindow* window, int x, int y)
     height = y;
 }
 
-void crouchCheck() {
+static void crouchCheck() {
     if (isCrouched) {
         playerH = 1.5f;
     }
@@ -68,12 +68,12 @@ void crouchCheck() {
         playerH = 3.0f;
     }
 }
-bool boundCheck(float bound) {
+static bool boundCheck(float bound) {
     return camTran.x <= bound && camTran.x >= -bound
         && camTran.z <= bound && camTran.z >= -bound;
 }
 
-void groundCheck() {
+static void groundCheck() {
     if (!isGrounded) {
         camTran.y += vsp;
         vsp -= grav;
@@ -82,6 +82,12 @@ void groundCheck() {
         camTran.y = playerH + ground;
         vsp = 0;
     }
+}
+
+bool hitBox(float x1, float x2, float y1, float y2, float z1, float z2) {
+    return (bullet.x > x1 && bullet.x < x2) &&
+           (bullet.y > y1 && bullet.y < y2) &&
+		   (bullet.z > z1 && bullet.z < z2);
 }
 
 void processInput(GLFWwindow* window)
@@ -124,7 +130,7 @@ void processInput(GLFWwindow* window)
 		isCrouched = false;
 
     if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
-        ammo = 30;
+        ammo = 60;
      
     if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
