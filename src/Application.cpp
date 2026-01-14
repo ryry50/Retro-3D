@@ -27,8 +27,8 @@ float health = 100.0f;
 
 //GUN
 bool shooting = false;
-glm::vec3 bullet;
 float range = 100;
+glm::vec3 rayCast;
 
 //SCREEN SETTINGS
 int width = 640, height = 480;
@@ -84,10 +84,10 @@ static void groundCheck() {
     }
 }
 
-bool hitBox(float x1, float x2, float y1, float y2, float z1, float z2) {
-    return (bullet.x > x1 && bullet.x < x2) &&
-           (bullet.y > y1 && bullet.y < y2) &&
-		   (bullet.z > z1 && bullet.z < z2);
+bool hitBox(float x1, float x2, float y1, float y2, float z1, float z2, glm::vec3 obj) {
+    return (rayCast.x > x1 + obj.x && rayCast.x < x2 + obj.x) &&
+           (rayCast.y > y1 + obj.y && rayCast.y < y2 + obj.y) &&
+		   (rayCast.z > z1 + obj.z && rayCast.z < z2 + obj.z);
 }
 
 void processInput(GLFWwindow* window)
@@ -519,10 +519,11 @@ int main(void)
         glfwSetCursorPosCallback(window, mouseInput);
         isGrounded = camTran.y - ground <= playerH && boundCheck(40) && camTran.y > ground;
         processInput(window);
+        rayCast = camTran + cameraForward * range;
 
         if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && ammo > 0) {
             ammo--;
-            bullet = cameraFront;
+            rayCast = cameraFront;
             shooting = true;
             std::cout << "Ammo: " << ammo << std::endl;
         }
