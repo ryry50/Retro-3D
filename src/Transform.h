@@ -14,7 +14,7 @@ private:
 	float deltaTime = currentTime - lastTime;
 
 	double tolerance = 0.1;
-	double toleranceC = 0.03;
+	double toleranceC = 0.07;
 	bool AtTarget;
 	bool AtTargetR;
 
@@ -161,4 +161,5 @@ public:
 		//if we are at the target rotation, return the target rotation
 		return glm::vec4(axis, angle);
 	}
+
 };

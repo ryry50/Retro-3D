@@ -23,6 +23,11 @@ class Collision {
 				   (box1.min.z <= box2.max.z && box1.max.z >= box2.min.z);
 		}
 
+		static bool hitBox(glm::vec3 bound, glm::vec3 obj, const AABB& box1) {
+			return glm::all(glm::lessThanEqual(box1.min, obj + bound)) &&
+				glm::all(glm::greaterThanEqual(box1.max, obj - bound));
+		}
+
 		//Check for collision in directions
 
 	private:

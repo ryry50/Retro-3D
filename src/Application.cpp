@@ -27,15 +27,16 @@ float health = 100.0f;
 
 //GUN
 bool shooting = false;
-float range = 100;
+float range = 1000;
 glm::vec3 rayCast;
 
 //SCREEN SETTINGS
 int width = 640, height = 480;
-GLdouble nearPlane = 1.0, farPlane = 100.0;
+GLdouble nearPlane = 1.0, farPlane = 1000.0;
 GLdouble left = -1, right = 1, bottom = -0.75, top = 0.75;
 
 //OBJECT VARIABLES
+double enemyHealth = 100.0f;
 
 //CAMERA VARIABLES
 glm::vec3 camTran = glm::vec3(0.0f, playerH, 8.0f);
@@ -48,6 +49,7 @@ double pitch = 0.0f;
 double lastX = width / 2.0;
 double lastY = height / 2.0;
 double fov = 45.0f;
+int angle = 0;
 
 //TIMING
 float deltaTime = 0.0f;	// time between current frame and last frame
@@ -74,9 +76,10 @@ static bool boundCheck(float bound) {
 }
 
 static void groundCheck() {
-    if (!isGrounded) {
+    if (!isGrounded ) {
         camTran.y += vsp;
-        vsp -= grav;
+        if(vsp > -1000.0f)
+            vsp -= grav;
     }
     if (isGrounded) {
         camTran.y = playerH + ground;
@@ -84,10 +87,18 @@ static void groundCheck() {
     }
 }
 
-bool hitBox(float x1, float x2, float y1, float y2, float z1, float z2, glm::vec3 obj) {
-    return (rayCast.x > x1 + obj.x && rayCast.x < x2 + obj.x) &&
-           (rayCast.y > y1 + obj.y && rayCast.y < y2 + obj.y) &&
-		   (rayCast.z > z1 + obj.z && rayCast.z < z2 + obj.z);
+bool hitBox(glm::vec3 bound, glm::vec3 obj) {
+    return glm::all(glm::lessThanEqual(rayCast, obj + bound)) &&
+        glm::all(glm::greaterThanEqual(rayCast, obj - bound));
+}
+
+bool hit(glm::vec3 bound, glm::vec3 obj) {
+    rayCast = camTran;
+    for (int i = 0; i < range; i++) {
+        rayCast += cameraFront * 0.1f;
+        if (hitBox(bound, obj)) return true;
+    }
+    return false;
 }
 
 void processInput(GLFWwindow* window)
@@ -129,8 +140,10 @@ void processInput(GLFWwindow* window)
     else if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_RELEASE)
 		isCrouched = false;
 
-    if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS && ammo < 60) {
         ammo = 60;
+        std::cout << "Reloaded!" << std::endl;
+    }
      
     if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -462,6 +475,7 @@ int main(void)
     float red[] = { 1.0f, 0.0f, 0.0f, 1.0f };
     float green[] = { 0.0f, 1.0f, 0.0f, 1.0f };
     float blue[] = { 0.0f, 0.0f, 1.0f, 1.0f };
+    float yellow[] = { 1.0f, 1.0f, 0.0f, 1.0f };
     float black[] = { 0.0f, 0.0f, 0.0f, 1.0f };
     float redTran[] = { 1.0f, 0.0f, 0.0f, 0.6f };
     float greenTran[] = { 0.0f, 1.0f, 0.0f, 0.7f };
@@ -495,14 +509,16 @@ int main(void)
 
     Transform move;
     Transform move2;
+    Transform move3;
     glm::vec3 diamond = move.init(glm::vec3(0, 10, 1));
-	glm::vec3 rec = glm::vec3(1.7, 0.5, 1);
+	glm::vec3 rec = move3.init(glm::vec3(1.7, 1, -3));
 	glm::vec3 gunPos = move2.init(glm::vec3(0.8, -1, -1.5));
 
     glEnable(GL_TEXTURE_2D);
     Texture texture("res/Textures/Met.jpg");
     Texture checker("res/Textures/DAMN.jpg");
 	Texture gunTex("res/Textures/dither_it_AK-47_type_II_noBG.png");
+	Texture skybox("res/Textures/NightDither.jpg");
     
     double view[] = { left, right, bottom, top, nearPlane, farPlane };
 	light(green, lightPos0, blue, lightPos1, white, lightPos2, light2Cutoff, lightPos2Dir, black, white);
@@ -519,19 +535,19 @@ int main(void)
         glfwSetCursorPosCallback(window, mouseInput);
         isGrounded = camTran.y - ground <= playerH && boundCheck(40) && camTran.y > ground;
         processInput(window);
-        rayCast = camTran + cameraForward * range;
 
         if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && ammo > 0) {
             ammo--;
-            rayCast = cameraFront;
             shooting = true;
-            std::cout << "Ammo: " << ammo << std::endl;
+            //std::cout << "Ammo: " << ammo << std::endl;
         }
         else {
             shooting = false;
         }
 
         glViewport(0, 0, width, height);
+
+		angle++;
 
         double lastTime = 0.0;
         double currentTime = glfwGetTime();
@@ -541,13 +557,21 @@ int main(void)
 		crouchCheck();
         groundCheck();
 
-        //std::cout << "height" << camTran.y << std::endl;
-
         //floor
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_LIGHTING);
         glShadeModel(GL_SMOOTH);
         
+        //skybox
+        {
+            skybox.bind();
+            render.drawStart(view, glm::vec3(0, ground, 0), camTran / 10.0f, cameraFront, cameraUp, glm::vec3(0), NULL);
+            //drawRecTex(4,  16, 4);
+            drawCubeTex(500);
+            skybox.unBind();
+        }
+
+        //Floor
         {
             texture.bind();
             render.drawStart(view, glm::vec3(0, ground, 0), camTran, cameraFront, cameraUp, glm::vec3(0), NULL);
@@ -556,14 +580,22 @@ int main(void)
             texture.unBind();
         }
 
-        light(green, lightPos0, blue, lightPos1, white, lightPos2, light2Cutoff, lightPos2Dir, black, white);
+        light(yellow, lightPos0, blue, lightPos1, white, lightPos2, light2Cutoff, lightPos2Dir, black, white);
         
-        //cube 
+        //BOX 
         {
             checker.bind();
             render.drawStart(view, rec, camTran, cameraFront, cameraUp, glm::vec3(1, 0, 0), 0);
-            drawRecTex(1, 0.5, 0.5);
+            drawRecTex(3, 1.5, 1.5);
             checker.unBind();
+            if (hit(glm::vec3(3, 1.5, 1.5), rec) && enemyHealth > 0 && shooting) {
+                enemyHealth -= 1.0f;
+                //std::cout << "Pointing" << std::endl;
+                std::cout << "Enemy Health: " << enemyHealth << std::endl;
+            }
+            if (enemyHealth <= 0) {
+				rec = move3.transLinear(glm::vec3(1.7, -5, -3), 3);
+            }
         }
 
         //Gem
@@ -572,9 +604,10 @@ int main(void)
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             render.draw(indices, sizeof(indices) / sizeof(indices[0]), greenTran, 
                 view, diamond, camTran, cameraFront, cameraUp,
-                glm::vec3(0, 1, 0), 0, 0);
+                glm::vec3(0, 1, 0), 2, angle);
             glDisable(GL_BLEND);
-            diamond = move.transLinear(glm::vec3(0, 0.5, 1), 3);
+			if (enemyHealth <= 0)
+                diamond = move.transLinear(glm::vec3(0, 3, 1), 3);
             /*
             if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
                 diamond = move.transLinear(glm::vec3(3, 5, 1), 7);
@@ -584,11 +617,20 @@ int main(void)
 
         }
 
+        //Text
+        {
+            font.init();
+            font.reshape(width, height);
+            GLfloat white[3] = { 1.0, 1.0, 1.0, };
+            font.printO("HEALTH", width/8, height/9, white);
+            font.drawUI(imageData.pixel_data, 5, 5, width/2, height/2, white);
+        }
+
         //gun
         {
-               
-            if(!idle && !shooting) {
-				gunPos = move2.transSin(glm::vec3(0.8, -1, -1.2), glm::vec3(0.8, -1, -1.5), 10);
+
+            if (!idle && !shooting) {
+                gunPos = move2.transSin(glm::vec3(0.8, -1, -1.2), glm::vec3(0.8, -1, -1.5), 10);
             }
             else if (shooting) {
                 gunPos = move2.transSin(glm::vec3(0.8, -1, -1.2), glm::vec3(0.8, -1, -1.5), 100);
@@ -600,15 +642,6 @@ int main(void)
             render.drawStartNoCam(view, gunPos, glm::vec3(0, 1, 0), 180);
             gun.drawModel();
             gunTex.unBind();
-        }
-
-        //Text
-        {
-            font.init();
-            font.reshape(width, height);
-            GLfloat white[3] = { 1.0, 1.0, 1.0, };
-            font.printO("HEALTH", width/8, height/9, white);
-            font.drawUI(imageData.pixel_data, 5, 5, width/2, height/2, white);
         }
 
        

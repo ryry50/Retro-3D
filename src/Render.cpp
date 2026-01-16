@@ -29,6 +29,7 @@ void Render::draw(unsigned int indices[], int count, float material[],
     double frustum[6], glm::vec3 tran,
     glm::vec3 camTran, glm::vec3 cameraFront, glm::vec3 cameraUp,
     glm::vec3 rotate, float rSpeed, float angle) {
+    //angle += rSpeed;
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, material);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -40,7 +41,6 @@ void Render::draw(unsigned int indices[], int count, float material[],
         cameraUp.x, cameraUp.y, cameraUp.z);
     glTranslatef(tran.x, tran.y, tran.z);
     glRotatef(angle, rotate.x, rotate.y, rotate.z);
-	angle += rSpeed;
     glNormal3f(0, 1, 0);
 
 	glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, indices);
