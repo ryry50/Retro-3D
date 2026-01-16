@@ -506,13 +506,14 @@ int main(void)
     render.init(positions, colors);
 
 	Model gun;
+    Model bot;
 
     Transform move;
     Transform move2;
     Transform move3;
     glm::vec3 diamond = move.init(glm::vec3(0, 10, 1));
 	glm::vec3 rec = move3.init(glm::vec3(1.7, 1, -3));
-	glm::vec3 gunPos = move2.init(glm::vec3(0.8, -1, -1.5));
+	glm::vec3 gunPos = move2.init(glm::vec3(0.8, -1, -1.2));
 
     glEnable(GL_TEXTURE_2D);
     Texture texture("res/Textures/Met.jpg");
@@ -524,6 +525,7 @@ int main(void)
 	light(green, lightPos0, blue, lightPos1, white, lightPos2, light2Cutoff, lightPos2Dir, black, white);
 
 	gun.loadModel("res/mesh/gun/AK.obj");
+    bot.loadModel("res/mesh/bot/PolyBotAnim.obj");
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -586,9 +588,9 @@ int main(void)
         {
             checker.bind();
             render.drawStart(view, rec, camTran, cameraFront, cameraUp, glm::vec3(1, 0, 0), 0);
-            drawRecTex(3, 1.5, 1.5);
+            bot.drawModel();
             checker.unBind();
-            if (hit(glm::vec3(3, 1.5, 1.5), rec) && enemyHealth > 0 && shooting) {
+            if (hit(glm::vec3(1, 3.5, 1), rec) && enemyHealth > 0 && shooting) {
                 enemyHealth -= 1.0f;
                 //std::cout << "Pointing" << std::endl;
                 std::cout << "Enemy Health: " << enemyHealth << std::endl;
@@ -616,6 +618,24 @@ int main(void)
             */
 
         }
+        //gun
+        {
+
+            if (!idle && !shooting) {
+                gunPos = move2.transSin(glm::vec3(0.8, -1, -1.0), glm::vec3(0.8, -1, -1.3), 10);
+            }
+            else if (shooting) {
+                gunPos = move2.transSin(glm::vec3(0.8, -1, -1.0), glm::vec3(0.8, -1, -1.3), 100);
+            }
+            else {
+                gunPos = move2.transSin(glm::vec3(0.8, -1, -1.0), glm::vec3(0.8, -0.9, -1.2), 2);
+            }
+            gunTex.bind();
+            render.drawStartNoCam(view, gunPos, glm::vec3(0, 1, 0), 180);
+            gun.drawModel();
+            gunTex.unBind();
+        }
+
 
         //Text
         {
@@ -624,24 +644,6 @@ int main(void)
             GLfloat white[3] = { 1.0, 1.0, 1.0, };
             font.printO("HEALTH", width/8, height/9, white);
             font.drawUI(imageData.pixel_data, 5, 5, width/2, height/2, white);
-        }
-
-        //gun
-        {
-
-            if (!idle && !shooting) {
-                gunPos = move2.transSin(glm::vec3(0.8, -1, -1.2), glm::vec3(0.8, -1, -1.5), 10);
-            }
-            else if (shooting) {
-                gunPos = move2.transSin(glm::vec3(0.8, -1, -1.2), glm::vec3(0.8, -1, -1.5), 100);
-            }
-            else {
-                gunPos = move2.transSin(glm::vec3(0.8, -1, -1.5), glm::vec3(0.8, -0.9, -1.5), 2);
-            }
-            gunTex.bind();
-            render.drawStartNoCam(view, gunPos, glm::vec3(0, 1, 0), 180);
-            gun.drawModel();
-            gunTex.unBind();
         }
 
        
