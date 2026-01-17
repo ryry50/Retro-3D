@@ -24,6 +24,7 @@ bool isCrouched = false;
 int ammo = 60;
 float speed = 0.1;
 float health = 100.0f;
+bool death = false;
 
 //GUN
 bool shooting = false;
@@ -512,13 +513,14 @@ int main(void)
     Transform move2;
     Transform move3;
     glm::vec3 diamond = move.init(glm::vec3(0, 10, 1));
-	glm::vec3 rec = move3.init(glm::vec3(1.7, 1, -3));
+	glm::vec3 rec = move3.init(glm::vec3(1.7, 0, -3));
 	glm::vec3 gunPos = move2.init(glm::vec3(0.8, -1, -1.2));
 
     glEnable(GL_TEXTURE_2D);
     Texture texture("res/Textures/Met.jpg");
     Texture checker("res/Textures/DAMN.jpg");
 	Texture gunTex("res/Textures/dither_it_AK-47_type_II_noBG.png");
+    Texture botTex("res/Textures/1_1767135590_red_metal.jpg");
 	Texture skybox("res/Textures/NightDither.jpg");
     
     double view[] = { left, right, bottom, top, nearPlane, farPlane };
@@ -586,10 +588,10 @@ int main(void)
         
         //BOX 
         {
-            checker.bind();
-            render.drawStart(view, rec, camTran, cameraFront, cameraUp, glm::vec3(1, 0, 0), 0);
+            botTex.bind();
+            render.drawStart(view, rec, camTran, cameraFront, cameraUp, glm::vec3(0, 1, 0), -90);
             bot.drawModel();
-            checker.unBind();
+            botTex.unBind();
             if (hit(glm::vec3(1, 3.5, 1), rec) && enemyHealth > 0 && shooting) {
                 enemyHealth -= 1.0f;
                 //std::cout << "Pointing" << std::endl;
