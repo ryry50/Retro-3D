@@ -75,6 +75,7 @@ enum screen{
     GAMEOVER,
     END
 };
+screen currentScreen = MENU;
 
 void window_size_callback(GLFWwindow* window, int x, int y)
 {
@@ -566,8 +567,6 @@ int main(void)
 	Model gun;
     Model bot;
 
-	screen currentScreen = MENU;
-
     //Textures
     glEnable(GL_TEXTURE_2D);
     Texture texture("res/Textures/Met.jpg");
@@ -842,7 +841,7 @@ int main(void)
 
 
 void mouseInput(GLFWwindow* window, double xposIn, double yposIn) {
-    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
+    if (currentScreen == GAME) {
 
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         float xpos = static_cast<float>(xposIn);
@@ -890,7 +889,7 @@ void mouseInput(GLFWwindow* window, double xposIn, double yposIn) {
         //std::cout << "yaw" << yaw << std::endl;
 
     }
-    else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE)
+    else if (currentScreen == MENU || currentScreen == END || currentScreen == GAMEOVER)
     {
         // Unhides cursor since camera is not looking around anymore
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
