@@ -27,7 +27,7 @@ public:
 		current.x = init.x;
 		current.y = init.y;
 		current.z = init.z;
-		std::cout << "X: " << current.x << " Y: " << current.y << " Z: " << current.z << std::endl;
+		//std::cout << "X: " << current.x << " Y: " << current.y << " Z: " << current.z << std::endl;
 
 		return current;
 	}

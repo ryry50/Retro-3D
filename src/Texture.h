@@ -38,6 +38,7 @@ public:
         glDeleteTextures(1, &m_renderId);
     }
 
+    unsigned char* getLocalBuffer() const { return m_localBuffer; }
 
     void bind(unsigned int slot = 0) const
     {

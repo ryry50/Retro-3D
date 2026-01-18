@@ -26,6 +26,8 @@ float speed = 0.1;
 float health = 100.0f;
 bool death = false;
 
+unsigned long debounceDelay = 10;
+
 //GUN
 bool shooting = false;
 float range = 1000;
@@ -35,9 +37,19 @@ glm::vec3 rayCast;
 int width = 640, height = 480;
 GLdouble nearPlane = 1.0, farPlane = 1000.0;
 GLdouble left = -1, right = 1, bottom = -0.75, top = 0.75;
+float screenScroll = 0.0f;
+bool transition = false;
 
 //OBJECT VARIABLES
-double enemyHealth = 100.0f;
+double enemyHealth = 700.0f;
+//Transformations
+Transform move;
+Transform move2;
+Transform move3;
+glm::vec3 diamond = move.init(glm::vec3(0, 1000, 1));
+glm::vec3 rec = move3.init(glm::vec3(1.7, 0, -3));
+glm::vec3 gunPos = move2.init(glm::vec3(0.8, -1, -1.2));
+
 
 //CAMERA VARIABLES
 glm::vec3 camTran = glm::vec3(0.0f, playerH, 8.0f);
@@ -53,9 +65,16 @@ double fov = 45.0f;
 int angle = 0;
 
 //TIMING
-float deltaTime = 0.0f;	// time between current frame and last frame
-float lastFrame = 0.0f;
+double lastTime = 0.0;
+double currentTime = glfwGetTime();
+double deltaTime = currentTime - lastTime;
 
+enum screen{
+    MENU = 0,
+    GAME,
+    GAMEOVER,
+    END
+};
 
 void window_size_callback(GLFWwindow* window, int x, int y)
 {
@@ -88,16 +107,16 @@ static void groundCheck() {
     }
 }
 
-bool hitBox(glm::vec3 bound, glm::vec3 obj) {
-    return glm::all(glm::lessThanEqual(rayCast, obj + bound)) &&
-        glm::all(glm::greaterThanEqual(rayCast, obj - bound));
+bool hitBox(glm::vec3 bound, glm::vec3 obj, glm::vec3 first) {
+    return glm::all(glm::lessThanEqual(first, obj + bound)) &&
+        glm::all(glm::greaterThanEqual(first, obj - bound));
 }
 
 bool hit(glm::vec3 bound, glm::vec3 obj) {
     rayCast = camTran;
     for (int i = 0; i < range; i++) {
         rayCast += cameraFront * 0.1f;
-        if (hitBox(bound, obj)) return true;
+        if (hitBox(bound, obj, rayCast)) return true;
     }
     return false;
 }
@@ -328,6 +347,42 @@ static void light( float color1[], float pos1[], float color2[], float pos2[], f
     glLightfv(GL_LIGHT2, GL_DIFFUSE, color3);
 }
 
+void mouseButton_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    if (key == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+    {
+		transition = true;
+    }
+}
+
+static void displayEnemyHealth() {
+    for(int i = 0; i < enemyHealth / 10; i++) {
+		glBegin(GL_QUADS);
+		glVertex2f(-0.9f + i * 0.02f, 0.9f);
+		glVertex2f(-0.86f + i * 0.02f, 0.9f);
+		glVertex2f(-0.86f + i * 0.02f, 0.95f);
+		glVertex2f(-0.9f + i * 0.02f, 0.95f);
+		glEnd();
+	}
+}
+
+static void restart() {
+   camTran = glm::vec3(0.0f, playerH, 8.0f);
+   cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+   cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+   cameraForward = glm::vec3(0.0f, 0.0f, -1.0f);
+
+    diamond = move.init(glm::vec3(0, 1000, 1));
+    rec = move3.init(glm::vec3(1.7, 0, -3));
+    gunPos = move2.init(glm::vec3(0.8, -1, -1.2));
+
+    vsp = 0;
+    death = false;
+
+	enemyHealth = 700.0f;
+	ammo = 60;
+}
+
 int main(void)
 {
     GLFWwindow* window;
@@ -503,154 +558,283 @@ int main(void)
     Font font;
     font.init();
 
+	//Renderer
     Render render;
     render.init(positions, colors);
 
+    //Models
 	Model gun;
     Model bot;
 
-    Transform move;
-    Transform move2;
-    Transform move3;
-    glm::vec3 diamond = move.init(glm::vec3(0, 10, 1));
-	glm::vec3 rec = move3.init(glm::vec3(1.7, 0, -3));
-	glm::vec3 gunPos = move2.init(glm::vec3(0.8, -1, -1.2));
+	screen currentScreen = MENU;
 
+    //Textures
     glEnable(GL_TEXTURE_2D);
     Texture texture("res/Textures/Met.jpg");
     Texture checker("res/Textures/DAMN.jpg");
 	Texture gunTex("res/Textures/dither_it_AK-47_type_II_noBG.png");
     Texture botTex("res/Textures/1_1767135590_red_metal.jpg");
 	Texture skybox("res/Textures/NightDither.jpg");
+	Texture menuTex("res/Textures/MenuScreen.png");
+    Texture overTex("res/Textures/GameOver.png");
+    Texture endTex("res/Textures/END.png");
     
     double view[] = { left, right, bottom, top, nearPlane, farPlane };
-	light(green, lightPos0, blue, lightPos1, white, lightPos2, light2Cutoff, lightPos2Dir, black, white);
+	//light(green, lightPos0, blue, lightPos1, white, lightPos2, light2Cutoff, lightPos2Dir, black, white);
 
+    //Load Models
 	gun.loadModel("res/mesh/gun/AK.obj");
     bot.loadModel("res/mesh/bot/PolyBotAnim.obj");
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
-        /* Render here */
-        render.clear();
-        glfwSetWindowSizeCallback(window, window_size_callback);
-        glfwSetWindowAspectRatio(window, 4, 3);
-        glfwSetCursorPosCallback(window, mouseInput);
-        isGrounded = camTran.y - ground <= playerH && boundCheck(40) && camTran.y > ground;
-        processInput(window);
 
-        if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && ammo > 0) {
-            ammo--;
-            shooting = true;
-            //std::cout << "Ammo: " << ammo << std::endl;
-        }
-        else {
-            shooting = false;
-        }
+        currentTime = glfwGetTime();
+        deltaTime = currentTime - lastTime;
 
-        glViewport(0, 0, width, height);
+		//std::cout << "FPS: " << deltaTime << std::endl;
+		//MENU SCREEN
+        if(currentScreen == MENU) {
+            restart();
+            /* Render here */
+            render.clear();
+            glfwSetWindowSizeCallback(window, window_size_callback);
+            glfwSetWindowAspectRatio(window, 4, 3);
+            glViewport(0, 0, width, height);
+            if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+                glfwSetWindowShouldClose(window, true);
 
-		angle++;
+            if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) && deltaTime >= 0.5)
+				transition = true;
 
-        double lastTime = 0.0;
-        double currentTime = glfwGetTime();
-        double deltaTime = currentTime - lastTime;
-        lastTime = currentTime;
-        
-		crouchCheck();
-        groundCheck();
+            if (transition) screenScroll += height / 100;
+            
+			if (screenScroll >= height / 1.5) currentScreen = GAME;
 
-        //floor
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_LIGHTING);
-        glShadeModel(GL_SMOOTH);
-        
-        //skybox
-        {
-            skybox.bind();
-            render.drawStart(view, glm::vec3(0, ground, 0), camTran / 10.0f, cameraFront, cameraUp, glm::vec3(0), NULL);
-            //drawRecTex(4,  16, 4);
-            drawCubeTex(500);
-            skybox.unBind();
-        }
-
-        //Floor
-        {
-            texture.bind();
-            render.drawStart(view, glm::vec3(0, ground, 0), camTran, cameraFront, cameraUp, glm::vec3(0), NULL);
-            //drawRecTex(4,  16, 4);
-			drawFloorTex(40, 8);
-            texture.unBind();
-        }
-
-        light(yellow, lightPos0, blue, lightPos1, white, lightPos2, light2Cutoff, lightPos2Dir, black, white);
-        
-        //BOX 
-        {
-            botTex.bind();
-            render.drawStart(view, rec, camTran, cameraFront, cameraUp, glm::vec3(0, 1, 0), -90);
-            bot.drawModel();
-            botTex.unBind();
-            if (hit(glm::vec3(1, 3.5, 1), rec) && enemyHealth > 0 && shooting) {
-                enemyHealth -= 1.0f;
-                //std::cout << "Pointing" << std::endl;
-                std::cout << "Enemy Health: " << enemyHealth << std::endl;
+            //Text
+            {
+                font.init();
+                font.reshape(width, height);
+                GLfloat white[3] = { 1.0, 1.0, 1.0, };
+				//font.drawUI(menuTex.getLocalBuffer(), menuTex.getWidth(), menuTex.getHeight(), width / 2, height / 2, white);
+				menuTex.bind();
+				glBegin(GL_QUADS);
+				glTexCoord2f(0.0f, 0.0f); glVertex2f(0, 0 + screenScroll);
+				glTexCoord2f(1.0f, 0.0f); glVertex2f(width, 0 + screenScroll);
+				glTexCoord2f(1.0f, 1.0f); glVertex2f(width, height + screenScroll);
+				glTexCoord2f(0.0f, 1.0f); glVertex2f(0, height + screenScroll);
+				glEnd();
+				menuTex.unBind();
+                font.printO("LEFT CLICK TO CONTINUE", width / 3, height / 10, white);
             }
-            if (enemyHealth <= 0) {
-				rec = move3.transLinear(glm::vec3(1.7, -5, -3), 3);
-            }
+
+			render.flush(window);
         }
 
-        //Gem
-        {
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            render.draw(indices, sizeof(indices) / sizeof(indices[0]), greenTran, 
-                view, diamond, camTran, cameraFront, cameraUp,
-                glm::vec3(0, 1, 0), 2, angle);
-            glDisable(GL_BLEND);
-			if (enemyHealth <= 0)
-                diamond = move.transLinear(glm::vec3(0, 3, 1), 3);
-            /*
-            if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
-                diamond = move.transLinear(glm::vec3(3, 5, 1), 7);
-            if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
-                diamond = move.transOut(glm::vec3(-4, 2, 1), 7);
-            */
+		//Main Game Screen
+        else if(currentScreen == GAME) {
+            /* Render here */
+            render.clear();
+            glfwSetWindowSizeCallback(window, window_size_callback);
+            glfwSetWindowAspectRatio(window, 4, 3);
+            glfwSetCursorPosCallback(window, mouseInput);
+            isGrounded = camTran.y - ground <= playerH && boundCheck(40) && camTran.y > ground;
+            processInput(window);
+            transition = false;
+			screenScroll = 0;
 
-        }
-        //gun
-        {
-
-            if (!idle && !shooting) {
-                gunPos = move2.transSin(glm::vec3(0.8, -1, -1.0), glm::vec3(0.8, -1, -1.3), 10);
-            }
-            else if (shooting) {
-                gunPos = move2.transSin(glm::vec3(0.8, -1, -1.0), glm::vec3(0.8, -1, -1.3), 100);
+            if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && ammo > 0) {
+                ammo--;
+                shooting = true;
+                //std::cout << "Ammo: " << ammo << std::endl;
             }
             else {
-                gunPos = move2.transSin(glm::vec3(0.8, -1, -1.0), glm::vec3(0.8, -0.9, -1.2), 2);
+                shooting = false;
             }
-            gunTex.bind();
-            render.drawStartNoCam(view, gunPos, glm::vec3(0, 1, 0), 180);
-            gun.drawModel();
-            gunTex.unBind();
+
+            glViewport(0, 0, width, height);
+
+            angle++;
+
+            crouchCheck();
+            groundCheck();
+
+            //floor
+            glEnable(GL_DEPTH_TEST);
+            glEnable(GL_LIGHTING);
+            glShadeModel(GL_SMOOTH);
+
+            //skybox
+            {
+                skybox.bind();
+                render.drawStart(view, glm::vec3(0, ground, 0), camTran / 10.0f, cameraFront, cameraUp, glm::vec3(0), NULL);
+                //drawRecTex(4,  16, 4);
+                drawCubeTex(500);
+                skybox.unBind();
+            }
+
+            //Floor
+            {
+                texture.bind();
+                render.drawStart(view, glm::vec3(0, ground, 0), camTran, cameraFront, cameraUp, glm::vec3(0), NULL);
+                //drawRecTex(4,  16, 4);
+                drawFloorTex(40, 8);
+                texture.unBind();
+            }
+
+            light(yellow, lightPos0, blue, lightPos1, white, lightPos2, light2Cutoff, lightPos2Dir, black, white);
+
+            //BOX 
+            {
+                botTex.bind();
+                render.drawStart(view, rec, camTran, cameraFront, cameraUp, glm::vec3(0, 1, 0), (glm::atan((rec.x - camTran.x) / (rec.z - camTran.z)) * 45) - 90);
+                bot.drawModel();
+                botTex.unBind();
+                if(enemyHealth > 0)
+					rec = move3.transLinear(glm::vec3(camTran.x, 0, camTran.z), 3);
+                if (hit(glm::vec3(1, 3.5, 1), rec) && enemyHealth > 0 && shooting) {
+                    enemyHealth -= 1.0f;
+                    //std::cout << "Pointing" << std::endl;
+                    std::cout << "Enemy Health: " << enemyHealth << std::endl;
+                }
+                if (enemyHealth <= 0) {
+                    rec = move3.transLinear(glm::vec3(rec.x, -5, rec.z), 3);
+                }
+            }
+
+            if (hitBox(glm::vec3(2, 3.5, 2), rec, camTran) && enemyHealth > 0 || camTran.y < -200) {
+                death = true;
+            }
+
+            //Gem
+            {
+                glEnable(GL_BLEND);
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+                render.draw(indices, sizeof(indices) / sizeof(indices[0]), greenTran,
+                    view, diamond, camTran, cameraFront, cameraUp,
+                    glm::vec3(0, 1, 0), 2, angle);
+                glDisable(GL_BLEND);
+                if (enemyHealth <= 0)
+                    diamond = move.transOut(glm::vec3(0, 3, 1), 5);
+                /*
+                if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
+                    diamond = move.transLinear(glm::vec3(3, 5, 1), 7);
+                if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
+                    diamond = move.transOut(glm::vec3(-4, 2, 1), 7);
+                */
+
+            }
+
+            if (hitBox(glm::vec3(1, 1, 1), diamond, camTran)) {
+                currentScreen = END;
+            }
+
+            //gun
+            {
+
+                if (!idle && !shooting) {
+                    gunPos = move2.transSin(glm::vec3(0.8, -1, -1.0), glm::vec3(0.8, -1, -1.3), 10);
+                }
+                else if (shooting) {
+                    gunPos = move2.transSin(glm::vec3(0.8, -1, -1.0), glm::vec3(0.8, -1, -1.3), 100);
+                }
+                else {
+                    gunPos = move2.transSin(glm::vec3(0.8, -1, -1.0), glm::vec3(0.8, -0.9, -1.2), 2);
+                }
+                gunTex.bind();
+                render.drawStartNoCam(view, gunPos, glm::vec3(0, 1, 0), 180);
+                gun.drawModel();
+                gunTex.unBind();
+            }
+
+
+            //Text and UI
+            {
+                font.init();
+                font.reshape(width, height);
+                GLfloat white[3] = { 1.0, 1.0, 1.0, };
+                font.printO("ENEMY HEALTH: ", width / 9, height / 1.2, white);
+                if(ammo <= 0)
+                    font.printO("PRESS R TO RELOAD ", width / 2, height / 1.4, red);
+                font.drawUI(imageData.pixel_data, 5, 5, width / 2, height / 2, white);
+                render.drawStartNoCam(view, glm::vec3(0.5, -0.4, -1.0), glm::vec3(0), 0);
+				displayEnemyHealth();
+            }
+
+            if (death) {
+				currentScreen = GAMEOVER;
+            }
+
+            render.flush(window);
         }
 
+		//Game Over Screen
+        else if(currentScreen == GAMEOVER) {
+            transition = false;
+            /* Render here */
+            render.clear();
+            glfwSetWindowSizeCallback(window, window_size_callback);
+            glfwSetWindowAspectRatio(window, 4, 3);
+            glViewport(0, 0, width, height);
+			lastTime = currentTime;
+            if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+                glfwSetWindowShouldClose(window, true);
+            if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+                lastTime = currentTime;
+                currentScreen = MENU;
+            }
+            //Text
+            {
+                font.init();
+                font.reshape(width, height);
+                GLfloat white[3] = { 1.0, 1.0, 1.0, };
+                //font.drawUI(menuTex.getLocalBuffer(), menuTex.getWidth(), menuTex.getHeight(), width / 2, height / 2, white);
+                overTex.bind();
+                glBegin(GL_QUADS);
+                glTexCoord2f(0.0f, 0.0f); glVertex2f(0, 0);
+                glTexCoord2f(1.0f, 0.0f); glVertex2f(width, 0);
+                glTexCoord2f(1.0f, 1.0f); glVertex2f(width, height);
+                glTexCoord2f(0.0f, 1.0f); glVertex2f(0, height);
+                glEnd();
+                overTex.unBind();
+                font.printO("WOW, CAN YOU PLAY VIDEO GAMES", width / 3, height / 10, white);
+            }
+            render.flush(window);
+		}
 
-        //Text
-        {
-            font.init();
-            font.reshape(width, height);
-            GLfloat white[3] = { 1.0, 1.0, 1.0, };
-            font.printO("HEALTH", width/8, height/9, white);
-            font.drawUI(imageData.pixel_data, 5, 5, width/2, height/2, white);
+        else if (currentScreen == END) {
+            transition = false;
+            /* Render here */
+            render.clear();
+            glfwSetWindowSizeCallback(window, window_size_callback);
+            glfwSetWindowAspectRatio(window, 4, 3);
+            glViewport(0, 0, width, height);
+            lastTime = currentTime;
+            if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+                glfwSetWindowShouldClose(window, true);
+            if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+                lastTime = currentTime;
+                currentScreen = MENU;
+            }
+            //Text
+            {
+                font.init();
+                font.reshape(width, height);
+                GLfloat white[3] = { 1.0, 1.0, 1.0, };
+                //font.drawUI(menuTex.getLocalBuffer(), menuTex.getWidth(), menuTex.getHeight(), width / 2, height / 2, white);
+                endTex.bind();
+                glBegin(GL_QUADS);
+                glTexCoord2f(0.0f, 0.0f); glVertex2f(0, 0);
+                glTexCoord2f(1.0f, 0.0f); glVertex2f(width, 0);
+                glTexCoord2f(1.0f, 1.0f); glVertex2f(width, height);
+                glTexCoord2f(0.0f, 1.0f); glVertex2f(0, height);
+                glEnd();
+                endTex.unBind();
+                font.printO("YOU'RE WINNER", width / 3, height / 12, white);
+            }
+            render.flush(window);
         }
-
-       
-        render.flush(window);
-
     }
     glfwTerminate();
     return 0;
