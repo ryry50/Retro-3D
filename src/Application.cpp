@@ -40,6 +40,10 @@ GLdouble left = -1, right = 1, bottom = -0.75, top = 0.75;
 float screenScroll = 0.0f;
 bool transition = false;
 
+double deltaT2 = 0.0;
+double lastT2 = 0.0;
+double currentT2 = glfwGetTime();
+
 //OBJECT VARIABLES
 double enemyHealth = 700.0f;
 //Transformations
@@ -591,12 +595,16 @@ int main(void)
 
         currentTime = glfwGetTime();
         deltaTime = currentTime - lastTime;
+        
+        currentT2 = glfwGetTime();
+        deltaT2 = currentT2 - lastT2;
 
 		//std::cout << "FPS: " << deltaTime << std::endl;
 		//MENU SCREEN
 		if(deltaTime > 1/60){
 		lastTime = currentTime;
         if(currentScreen == MENU) {
+            
             restart();
             /* Render here */
             render.clear();
@@ -606,7 +614,7 @@ int main(void)
             if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
                 glfwSetWindowShouldClose(window, true);
 
-            if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT))
+            if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) && deltaT2 > 0.5)
 				transition = true;
 
             if (transition) screenScroll += height / 100;
@@ -782,7 +790,7 @@ int main(void)
             if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
                 glfwSetWindowShouldClose(window, true);
             if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
-                lastTime = currentTime;
+				lastT2 = currentT2;
                 currentScreen = MENU;
             }
             //Text
@@ -811,11 +819,10 @@ int main(void)
             glfwSetWindowSizeCallback(window, window_size_callback);
             glfwSetWindowAspectRatio(window, 4, 3);
             glViewport(0, 0, width, height);
-            lastTime = currentTime;
             if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
                 glfwSetWindowShouldClose(window, true);
             if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
-                lastTime = currentTime;
+                lastT2 = currentT2;
                 currentScreen = MENU;
             }
             //Text
