@@ -594,6 +594,8 @@ int main(void)
 
 		//std::cout << "FPS: " << deltaTime << std::endl;
 		//MENU SCREEN
+		if(deltaTime > 1/60){
+		lastTime = currentTime;
         if(currentScreen == MENU) {
             restart();
             /* Render here */
@@ -604,7 +606,7 @@ int main(void)
             if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
                 glfwSetWindowShouldClose(window, true);
 
-            if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) && deltaTime >= 0.5)
+            if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT))
 				transition = true;
 
             if (transition) screenScroll += height / 100;
@@ -834,6 +836,7 @@ int main(void)
             }
             render.flush(window);
         }
+		}
     }
     glfwTerminate();
     return 0;
