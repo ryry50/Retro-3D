@@ -416,6 +416,8 @@ int main(void)
 
     std::cout << "Version: " << glGetString(GL_VERSION) << std::endl;
 
+    glfwSwapInterval(1);
+
     //Vertices  
     float positions[]{
         0.0f,-0.5f, 0.0f,
