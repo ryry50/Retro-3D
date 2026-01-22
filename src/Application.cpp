@@ -711,6 +711,7 @@ int main(void)
             }
 
             if (hitBox(glm::vec3(2, 3.5, 2), rec, camTran) && enemyHealth > 0 || camTran.y < -200) {
+                lastT2 = currentT2;
                 death = true;
             }
 
@@ -734,6 +735,7 @@ int main(void)
             }
 
             if (hitBox(glm::vec3(1, 1, 1), diamond, camTran)) {
+				lastT2 = currentT2;
                 currentScreen = END;
             }
 
@@ -778,10 +780,9 @@ int main(void)
 		//Game Over Screen
         else if(currentScreen == GAMEOVER) {
             transition = false;
-			lastTime = currentTime;
             if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
                 glfwSetWindowShouldClose(window, true);
-            if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+            if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && deltaT2 > 0.5) {
 				lastT2 = currentT2;
                 currentScreen = MENU;
             }
@@ -807,7 +808,7 @@ int main(void)
             transition = false;
             if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
                 glfwSetWindowShouldClose(window, true);
-            if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+            if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && deltaT2 > 0.5) {
                 lastT2 = currentT2;
                 currentScreen = MENU;
             }
