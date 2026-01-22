@@ -416,6 +416,7 @@ int main(void)
 
     std::cout << "Version: " << glGetString(GL_VERSION) << std::endl;
 
+	//Sets vertical sync
     glfwSwapInterval(1);
 
     //Vertices  
@@ -594,6 +595,10 @@ int main(void)
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
+        render.clear();
+        glfwSetWindowSizeCallback(window, window_size_callback);
+        glfwSetWindowAspectRatio(window, 4, 3);
+        glViewport(0, 0, width, height);
 
         currentTime = glfwGetTime();
         deltaTime = currentTime - lastTime;
@@ -609,10 +614,6 @@ int main(void)
             
             restart();
             /* Render here */
-            render.clear();
-            glfwSetWindowSizeCallback(window, window_size_callback);
-            glfwSetWindowAspectRatio(window, 4, 3);
-            glViewport(0, 0, width, height);
             if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
                 glfwSetWindowShouldClose(window, true);
 
@@ -640,15 +641,10 @@ int main(void)
                 font.printO("LEFT CLICK TO CONTINUE", width / 3, height / 10, white);
             }
 
-			render.flush(window);
         }
 
 		//Main Game Screen
         else if(currentScreen == GAME) {
-            /* Render here */
-            render.clear();
-            glfwSetWindowSizeCallback(window, window_size_callback);
-            glfwSetWindowAspectRatio(window, 4, 3);
             glfwSetCursorPosCallback(window, mouseInput);
             isGrounded = camTran.y - ground <= playerH && boundCheck(40) && camTran.y > ground;
             processInput(window);
@@ -777,17 +773,11 @@ int main(void)
 				currentScreen = GAMEOVER;
             }
 
-            render.flush(window);
         }
 
 		//Game Over Screen
         else if(currentScreen == GAMEOVER) {
             transition = false;
-            /* Render here */
-            render.clear();
-            glfwSetWindowSizeCallback(window, window_size_callback);
-            glfwSetWindowAspectRatio(window, 4, 3);
-            glViewport(0, 0, width, height);
 			lastTime = currentTime;
             if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
                 glfwSetWindowShouldClose(window, true);
@@ -811,16 +801,10 @@ int main(void)
                 overTex.unBind();
                 font.printO("WOW, CAN YOU PLAY VIDEO GAMES", width / 3, height / 10, white);
             }
-            render.flush(window);
 		}
 
         else if (currentScreen == END) {
             transition = false;
-            /* Render here */
-            render.clear();
-            glfwSetWindowSizeCallback(window, window_size_callback);
-            glfwSetWindowAspectRatio(window, 4, 3);
-            glViewport(0, 0, width, height);
             if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
                 glfwSetWindowShouldClose(window, true);
             if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
@@ -843,8 +827,8 @@ int main(void)
                 endTex.unBind();
                 font.printO("YOU'RE WINNER", width / 3, height / 12, white);
             }
-            render.flush(window);
         }
+        render.flush(window);
 		}
     }
     glfwTerminate();
@@ -859,13 +843,14 @@ void mouseInput(GLFWwindow* window, double xposIn, double yposIn) {
         float xpos = static_cast<float>(xposIn);
         float ypos = static_cast<float>(yposIn);
 
+        /*
         if (firstMouse)
         {
             lastX = xpos;
             lastY = ypos;
             firstMouse = false;
         }
-
+        */
         float xoffset = xpos - lastX;
         float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
         lastX = xpos;
@@ -906,6 +891,6 @@ void mouseInput(GLFWwindow* window, double xposIn, double yposIn) {
         // Unhides cursor since camera is not looking around anymore
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         // Makes sure the next time the camera looks around it doesn't jump
-        firstMouse = true;
+        //firstMouse = true;
     }
 }
