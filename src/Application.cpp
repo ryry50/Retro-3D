@@ -610,41 +610,6 @@ int main(void)
 		//MENU SCREEN
 		if(deltaTime > 1/60){
 		lastTime = currentTime;
-        if(currentScreen == MENU) {
-            
-            restart();
-            /* Render here */
-            if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-                glfwSetWindowShouldClose(window, true);
-
-            if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) && deltaT2 > 0.5)
-				transition = true;
-
-            if (transition) screenScroll += height / 100;
-            
-			if (screenScroll >= height / 1.5) currentScreen = GAME;
-
-            //Text
-            {
-                font.init();
-                font.reshape(width, height);
-                GLfloat white[3] = { 1.0, 1.0, 1.0, };
-				//font.drawUI(menuTex.getLocalBuffer(), menuTex.getWidth(), menuTex.getHeight(), width / 2, height / 2, white);
-				menuTex.bind();
-				glBegin(GL_QUADS);
-				glTexCoord2f(0.0f, 0.0f); glVertex2f(0, 0 + screenScroll);
-				glTexCoord2f(1.0f, 0.0f); glVertex2f(width, 0 + screenScroll);
-				glTexCoord2f(1.0f, 1.0f); glVertex2f(width, height + screenScroll);
-				glTexCoord2f(0.0f, 1.0f); glVertex2f(0, height + screenScroll);
-				glEnd();
-				menuTex.unBind();
-                font.printO("LEFT CLICK TO CONTINUE", width / 3, height / 10, white);
-            }
-
-        }
-
-		//Main Game Screen
-        else if(currentScreen == GAME) {
             glfwSetCursorPosCallback(window, mouseInput);
             isGrounded = camTran.y - ground <= playerH && boundCheck(40) && camTran.y > ground;
             processInput(window);
@@ -675,7 +640,7 @@ int main(void)
             //skybox
             {
                 skybox.bind();
-                render.drawStart(view, glm::vec3(0, ground, 0), camTran / 10.0f, cameraFront, cameraUp, glm::vec3(0), NULL);
+                render.drawStart(view, glm::vec3(0, ground, 0), camTran / 10.0f, cameraFront, cameraUp, glm::vec4(0));
                 //drawRecTex(4,  16, 4);
                 drawCubeTex(500);
                 skybox.unBind();
@@ -684,7 +649,7 @@ int main(void)
             //Floor
             {
                 texture.bind();
-                render.drawStart(view, glm::vec3(0, ground, 0), camTran, cameraFront, cameraUp, glm::vec3(0), NULL);
+                render.drawStart(view, glm::vec3(0, ground, 0), camTran, cameraFront, cameraUp, glm::vec4(0));
                 //drawRecTex(4,  16, 4);
                 drawFloorTex(40, 8);
                 texture.unBind();
@@ -695,9 +660,10 @@ int main(void)
             //BOX 
             {
                 botTex.bind();
-                render.drawStart(view, rec, camTran, cameraFront, cameraUp, glm::vec3(0, 1, 0), (glm::atan((rec.x - camTran.x) / (rec.z - camTran.z)) * 45) - 90);
+                render.drawStart(view, rec, camTran, cameraFront, cameraUp, glm::vec4(0, 1, 0, (glm::atan((rec.x - camTran.x) / (rec.z - camTran.z)) * 45) - 90));
                 bot.drawModel();
                 botTex.unBind();
+                /*
                 if(enemyHealth > 0)
 					rec = move3.transLinear(glm::vec3(camTran.x, 0, camTran.z), 3);
                 if (hit(glm::vec3(1, 3.5, 1), rec) && enemyHealth > 0 && shooting) {
@@ -708,20 +674,22 @@ int main(void)
                 if (enemyHealth <= 0) {
                     rec = move3.transLinear(glm::vec3(rec.x, -5, rec.z), 3);
                 }
+                */
             }
+            /*
 
             if (hitBox(glm::vec3(2, 3.5, 2), rec, camTran) && enemyHealth > 0 || camTran.y < -200) {
                 lastT2 = currentT2;
                 death = true;
             }
-
+            */
             //Gem
             {
                 glEnable(GL_BLEND);
                 glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
                 render.draw(indices, sizeof(indices) / sizeof(indices[0]), greenTran,
                     view, diamond, camTran, cameraFront, cameraUp,
-                    glm::vec3(0, 1, 0), 2, angle);
+                    glm::vec4(0, 1, 0, angle));
                 glDisable(GL_BLEND);
                 if (enemyHealth <= 0)
                     diamond = move.transOut(glm::vec3(0, 3, 1), 5);
@@ -734,10 +702,12 @@ int main(void)
 
             }
 
+            /*
             if (hitBox(glm::vec3(1, 1, 1), diamond, camTran)) {
 				lastT2 = currentT2;
                 currentScreen = END;
             }
+            */
 
             //gun
             {
@@ -752,7 +722,7 @@ int main(void)
                     gunPos = move2.transSin(glm::vec3(0.8, -1, -1.0), glm::vec3(0.8, -0.9, -1.2), 2);
                 }
                 gunTex.bind();
-                render.drawStartNoCam(view, gunPos, glm::vec3(0, 1, 0), 180);
+                render.drawStartNoCam(view, gunPos, glm::vec4(0, 1, 0, 180));
                 gun.drawModel();
                 gunTex.unBind();
             }
@@ -767,68 +737,15 @@ int main(void)
                 if(ammo <= 0)
                     font.printO("PRESS R TO RELOAD ", width / 2, height / 1.4, red);
                 font.drawUI(imageData.pixel_data, 5, 5, width / 2, height / 2, white);
-                render.drawStartNoCam(view, glm::vec3(0.5, -0.4, -1.0), glm::vec3(0), 0);
+                render.drawStartNoCam(view, glm::vec3(0.5, -0.4, -1.0), glm::vec4(0));
 				displayEnemyHealth();
             }
-
+            /*
             if (death) {
 				currentScreen = GAMEOVER;
             }
-
-        }
-
-		//Game Over Screen
-        else if(currentScreen == GAMEOVER) {
-            transition = false;
-            if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-                glfwSetWindowShouldClose(window, true);
-            if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && deltaT2 > 0.5) {
-				lastT2 = currentT2;
-                currentScreen = MENU;
-            }
-            //Text
-            {
-                font.init();
-                font.reshape(width, height);
-                GLfloat white[3] = { 1.0, 1.0, 1.0, };
-                //font.drawUI(menuTex.getLocalBuffer(), menuTex.getWidth(), menuTex.getHeight(), width / 2, height / 2, white);
-                overTex.bind();
-                glBegin(GL_QUADS);
-                glTexCoord2f(0.0f, 0.0f); glVertex2f(0, 0);
-                glTexCoord2f(1.0f, 0.0f); glVertex2f(width, 0);
-                glTexCoord2f(1.0f, 1.0f); glVertex2f(width, height);
-                glTexCoord2f(0.0f, 1.0f); glVertex2f(0, height);
-                glEnd();
-                overTex.unBind();
-                font.printO("WOW, CAN YOU PLAY VIDEO GAMES", width / 3, height / 10, white);
-            }
-		}
-
-        else if (currentScreen == END) {
-            transition = false;
-            if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-                glfwSetWindowShouldClose(window, true);
-            if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && deltaT2 > 0.5) {
-                lastT2 = currentT2;
-                currentScreen = MENU;
-            }
-            //Text
-            {
-                font.init();
-                font.reshape(width, height);
-                GLfloat white[3] = { 1.0, 1.0, 1.0, };
-                //font.drawUI(menuTex.getLocalBuffer(), menuTex.getWidth(), menuTex.getHeight(), width / 2, height / 2, white);
-                endTex.bind();
-                glBegin(GL_QUADS);
-                glTexCoord2f(0.0f, 0.0f); glVertex2f(0, 0);
-                glTexCoord2f(1.0f, 0.0f); glVertex2f(width, 0);
-                glTexCoord2f(1.0f, 1.0f); glVertex2f(width, height);
-                glTexCoord2f(0.0f, 1.0f); glVertex2f(0, height);
-                glEnd();
-                endTex.unBind();
-                font.printO("YOU'RE WINNER", width / 3, height / 12, white);
-            }
-        }
+            */
+        
         render.flush(window);
 		}
     }
@@ -838,7 +755,7 @@ int main(void)
 
 
 void mouseInput(GLFWwindow* window, double xposIn, double yposIn) {
-    if (currentScreen == GAME) {
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
 
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         float xpos = static_cast<float>(xposIn);
@@ -887,7 +804,7 @@ void mouseInput(GLFWwindow* window, double xposIn, double yposIn) {
         //std::cout << "yaw" << yaw << std::endl;
 
     }
-    else if (currentScreen == MENU || currentScreen == END || currentScreen == GAMEOVER)
+    else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE)
     {
         // Unhides cursor since camera is not looking around anymore
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);

@@ -16,20 +16,20 @@ public:
 	void draw(unsigned int indices[], int count, float material[],
 		double frustum[6], glm::vec3 tran,
 		glm::vec3 camTran, glm::vec3 cameraFront, glm::vec3 cameraUp, 
-		glm::vec3 rotate, float rSpeed, float angle);
+		glm::vec4 rotation);
 	void drawTex(unsigned int indices[], int count, float material[],
 		double frustum[6], glm::vec3 tran,
 		glm::vec3 camTran, glm::vec3 cameraFront, glm::vec3 cameraUp,
-		glm::vec3 rotate, float rSpeed, Texture tex);
+		glm::vec4 rotation, Texture tex);
 	void drawStart(
 		double frustum[6], glm::vec3 tran,
 		glm::vec3 camTran, glm::vec3 cameraFront, glm::vec3 cameraUp,
-		glm::vec3 rotate, float rSpeed);
+		glm::vec4 rotation);
 	void drawStartNoCam(
 		double frustum[6], glm::vec3 tran,
-		glm::vec3 rotate, float rSpeed);
+		glm::vec4 rotation);
 	void drawStartTex(
 		double frustum[6], glm::vec3 tran,
 		glm::vec3 camTran, glm::vec3 cameraFront, glm::vec3 cameraUp,
-		glm::vec3 rotate, float rSpeed, void shape(), Texture tex);
+		glm::vec4 rotation, void shape(), Texture tex);
 };

@@ -5,11 +5,9 @@ SkeletalMesh::SkeletalMesh() {}
 SkeletalMesh::~SkeletalMesh() {}
 
 int SkeletalMesh::getAnimationData(char* path) {
-	struct Pos { float x, y, z; };
-	struct Rot { float xr, yr, zr; };
+	struct Bones { int ID; float x, y, z; float xr, yr, zr; };
 
-	std::vector< std::vector<Pos> > bonePositions;
-	std::vector< std::vector<Rot> > boneRotations;
+	std::vector< std::vector<Bones> > boneProperties;
 
 	std::cout << "Loading animation data: " << path << std::endl;
 
@@ -28,6 +26,8 @@ int SkeletalMesh::getAnimationData(char* path) {
 	do {
 		fscanf_s(fd, "%d", &id);
 		fscanf_s(fd, "%lf %lf %lf", &bPos[0], &bPos[1], &bPos[2]);
+
+
 
 	} while (!feof(fd));
 
